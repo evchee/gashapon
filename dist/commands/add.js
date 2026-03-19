@@ -3,20 +3,41 @@ import { BaseCommand } from '../base-command.js';
 import { ServerConfigSchema } from '../config/schema.js';
 import { buildReceipt } from '../output/receipt.js';
 import { usageError } from '../output/errors.js';
-// Well-known server presets that require specific configuration
-const WELL_KNOWN_SERVERS = {
-    slack: {
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+function readClaudeSlackMcpJson() {
+    const p = path.join(os.homedir(), '.claude', 'plugins', 'marketplaces', 'claude-plugins-official', 'external_plugins', 'slack', '.mcp.json');
+    try {
+        const raw = JSON.parse(fs.readFileSync(p, 'utf8'));
+        return {
+            clientId: raw?.slack?.oauth?.clientId,
+            callbackPort: raw?.slack?.oauth?.callbackPort,
+        };
+    }
+    catch {
+        return {};
+    }
+}
+function buildSlackServerConfig() {
+    const { clientId, callbackPort } = readClaudeSlackMcpJson();
+    return {
         transport: 'http',
         url: 'https://mcp.slack.com/mcp',
         headers: {},
         oauth: {
             grant_type: 'authorization_code',
-            client_id: '1601185624273.8899143856786',
-            callback_port: 3118,
+            ...(clientId ? { client_id: clientId } : {}),
+            ...(callbackPort ? { callback_port: callbackPort } : {}),
         },
         installed: false,
         description: 'Slack MCP server',
-    },
+    };
+}
+// Well-known server presets that require specific configuration.
+// Values are functions so that dynamic reads (e.g. from Claude Code config) happen at call time.
+const WELL_KNOWN_SERVERS = {
+    slack: buildSlackServerConfig,
 };
 export default class Add extends BaseCommand {
     static description = 'Register an MCP server in gashapon config';
@@ -73,7 +94,7 @@ export default class Add extends BaseCommand {
         let serverConfig;
         // Check for well-known server preset
         if (name in WELL_KNOWN_SERVERS && process.argv.indexOf('--') === -1 && !flags.url && !flags.command && !flags.transport) {
-            serverConfig = WELL_KNOWN_SERVERS[name];
+            serverConfig = WELL_KNOWN_SERVERS[name]();
             if (flags.force) {
                 await this.configManager.forceAddServer(name, serverConfig);
             }
