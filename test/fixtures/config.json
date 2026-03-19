@@ -1,0 +1,14 @@
+{
+  "version": "1",
+  "bin_dir": "/tmp/capsule-test-bin",
+  "servers": {
+    "test": {
+      "transport": "stdio",
+      "command": "echo",
+      "args": [],
+      "env": {},
+      "installed": false,
+      "description": "Test server"
+    }
+  }
+}
