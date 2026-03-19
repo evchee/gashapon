@@ -7,6 +7,7 @@ import { interpolateEnv } from '../util/env.js'
 import { CliOAuthProvider, findFreePort } from '../auth/provider.js'
 import { FileTokenStore } from '../auth/token-store.js'
 import { notFound, usageError } from '../output/errors.js'
+import type { OAuthConfig } from '../config/schema.js'
 import { buildReceipt } from '../output/receipt.js'
 
 export default class Auth extends BaseCommand<typeof Auth> {
@@ -38,19 +39,14 @@ export default class Auth extends BaseCommand<typeof Auth> {
     if (serverConfig.transport !== 'http') {
       throw usageError(`Server "${name}" uses stdio transport — OAuth only applies to HTTP servers`)
     }
-    if (!serverConfig.oauth) {
-      throw usageError(
-        `Server "${name}" has no oauth config`,
-        ['Add oauth config with client_id and optionally client_secret, e.g.:\n  gashapon add <name> --url <url> --oauth-client-id <id>'],
-      )
-    }
-
+    // oauth config is optional — if absent, use dynamic discovery + dynamic client registration
     const oauthConfig = {
-      ...serverConfig.oauth,
-      client_id: serverConfig.oauth.client_id,
-      client_secret: serverConfig.oauth.client_secret
+      grant_type: serverConfig.oauth?.grant_type ?? 'authorization_code' as const,
+      client_id: serverConfig.oauth?.client_id,
+      client_secret: serverConfig.oauth?.client_secret
         ? interpolateEnv(serverConfig.oauth.client_secret)
         : undefined,
+      scope: serverConfig.oauth?.scope,
     }
 
     const store = new FileTokenStore(name)

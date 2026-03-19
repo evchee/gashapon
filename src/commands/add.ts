@@ -33,6 +33,7 @@ export default class Add extends BaseCommand<typeof Add> {
     description: Flags.string({ char: 'd', summary: 'Human-readable description' }),
     force: Flags.boolean({ summary: 'Overwrite if server already exists', default: false }),
     'from-json-b64': Flags.string({ summary: 'Base64-encoded JSON server config (used by undo commands)' }),
+    oauth: Flags.boolean({ summary: 'Enable OAuth for this HTTP server (run `gashapon auth <name>` after adding)', default: false }),
     'oauth-client-id': Flags.string({ summary: 'OAuth client ID (http transport)' }),
     'oauth-client-secret': Flags.string({ summary: 'OAuth client secret or ${ENV_VAR} reference (http transport)' }),
     'oauth-scope': Flags.string({ summary: 'OAuth scope(s) to request (http transport)' }),
@@ -82,7 +83,7 @@ export default class Add extends BaseCommand<typeof Add> {
     } else if (flags.url) {
       // HTTP transport
       const headers = parseKeyVal(flags.header ?? [])
-      const hasOAuth = flags['oauth-client-id'] || flags['oauth-client-secret']
+      const hasOAuth = flags.oauth || flags['oauth-client-id'] || flags['oauth-client-secret']
       serverConfig = {
         transport: 'http',
         url: flags.url,
