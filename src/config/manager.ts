@@ -22,7 +22,7 @@ export class ConfigManager {
       return GashaponConfigSchema.parse(parsed)
     } catch (err: unknown) {
       if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
-        return { ...DEFAULT_CONFIG, servers: {} }
+        return { ...DEFAULT_CONFIG, tools: { ...DEFAULT_CONFIG.tools }, servers: {} }
       }
       throw err
     }

@@ -20,17 +20,32 @@ export class ExecutionEngine {
             process.stdout.write(JSON.stringify(err.toJSON(), null, 2) + '\n');
             process.exit(EXIT.NOT_FOUND);
         }
-        // Load or auto-sync cache
+        // Load or auto-sync cache (treat stale entries as a refresh trigger but keep as fallback)
         let cached = await this.cache.get(serverName);
-        if (!cached) {
-            process.stderr.write(`Cache miss for "${serverName}", auto-syncing...\n`);
-            const client = new MCPClientWrapper(serverName, serverConfig);
-            await client.connect();
-            const tools = await client.listTools();
-            await client.close();
-            const mapping = buildMapping(tools);
-            cached = { version: '1', timestamp: new Date().toISOString(), tools, mapping };
-            await this.cache.set(serverName, cached);
+        const isStale = cached ? await this.cache.isStale(serverName) : false;
+        if (!cached || isStale) {
+            process.stderr.write(`Cache ${cached ? 'stale' : 'miss'} for "${serverName}", auto-syncing...\n`);
+            const refreshClient = new MCPClientWrapper(serverName, serverConfig);
+            try {
+                await refreshClient.connect();
+                try {
+                    const tools = await refreshClient.listTools();
+                    const mapping = buildMapping(tools);
+                    cached = { version: '1', timestamp: new Date().toISOString(), tools, mapping };
+                    await this.cache.set(serverName, cached);
+                }
+                finally {
+                    await refreshClient.close();
+                }
+            }
+            catch (err) {
+                if (!cached) {
+                    // No usable cache at all — re-throw so the caller sees the real error
+                    throw err;
+                }
+                // Stale cache is still usable; warn and continue with what we have
+                process.stderr.write(`Auto-sync failed (${err.message}); using stale cache for "${serverName}"\n`);
+            }
         }
         const { mapping, tools } = cached;
         // Short-circuit: --capabilities

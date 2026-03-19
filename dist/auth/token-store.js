@@ -28,6 +28,11 @@ export class FileTokenStore {
         const data = await this.load();
         await this.save({ ...data, tokens });
     }
+    async clearTokens() {
+        const data = await this.load();
+        delete data.tokens;
+        await this.save(data);
+    }
     async getClientInfo() {
         return (await this.load()).client_info;
     }

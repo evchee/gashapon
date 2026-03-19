@@ -5,14 +5,26 @@ import path from 'node:path';
 import { BaseCommand } from '../base-command.js';
 import { binDir } from '../config/paths.js';
 const MARKER = '# gashapon PATH';
-/** Detect the user's login shell config file. */
-function shellConfigFile() {
+/** Detect the user's login shell. */
+function detectShell() {
     const shell = process.env.SHELL ?? '';
-    if (shell.endsWith('zsh'))
-        return path.join(os.homedir(), '.zshrc');
-    if (shell.endsWith('fish'))
+    return shell.endsWith('fish') ? 'fish' : 'posix';
+}
+/** Detect the user's login shell config file. */
+function shellConfigFile(shell) {
+    if (shell === 'fish')
         return path.join(os.homedir(), '.config', 'fish', 'config.fish');
+    const s = process.env.SHELL ?? '';
+    if (s.endsWith('zsh'))
+        return path.join(os.homedir(), '.zshrc');
     return path.join(os.homedir(), '.bashrc');
+}
+/** Build the PATH export line appropriate for the shell. */
+function pathLine(shell, binPath, marker) {
+    if (shell === 'fish') {
+        return `fish_add_path "${binPath}"  ${marker}`;
+    }
+    return `export PATH="${binPath}:$PATH"  ${marker}`;
 }
 export default class Init extends BaseCommand {
     static description = 'Add gashapon bin directory to PATH in your shell config';
@@ -31,12 +43,13 @@ export default class Init extends BaseCommand {
         const { flags } = await this.parse(Init);
         const config = await this.configManager.load();
         const bd = binDir(config);
-        const exportLine = `export PATH="${bd}:$PATH"  ${MARKER}`;
+        const shell = detectShell();
+        const exportLine = pathLine(shell, bd, MARKER);
         if (flags.print) {
             process.stdout.write(exportLine + '\n');
             return;
         }
-        const configFile = shellConfigFile();
+        const configFile = shellConfigFile(shell);
         let contents = '';
         try {
             contents = await fs.readFile(configFile, 'utf8');

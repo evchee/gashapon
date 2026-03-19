@@ -22,7 +22,7 @@ export default class Remove extends BaseCommand {
         // Build undo command using base64-encoded JSON
         const configJson = JSON.stringify({ ...removed, installed: false });
         const b64 = Buffer.from(configJson).toString('base64');
-        const undoCmd = `gashapon add ${args.name} --from-json-b64 ${b64}`;
+        const undoCmd = `gashapon add ${args.name} --from-json-b64 '${b64}'`;
         const receipt = buildReceipt('remove', args.name, undoCmd);
         this.outputData(receipt);
     }

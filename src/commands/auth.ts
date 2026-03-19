@@ -86,7 +86,11 @@ export default class Auth extends BaseCommand<typeof Auth> {
     process.stderr.write(`Listening for OAuth callback on http://localhost:${port}/callback\n`)
 
     try {
-      // Phase 1: start auth flow — calls redirectToAuthorization() and returns 'REDIRECT'
+      // Phase 1: start auth flow — calls redirectToAuthorization() and returns 'REDIRECT'.
+      // transport is created with authProvider so that finishAuth (phase 2) can use the
+      // provider's stored discovery state and code verifier to exchange the code for tokens.
+      // auth() is called separately to drive discovery and the redirect; transport is only
+      // needed for the finishAuth code exchange.
       const transport = new StreamableHTTPClientTransport(serverUrl, { authProvider: provider })
       const result = await auth(provider, { serverUrl })
 

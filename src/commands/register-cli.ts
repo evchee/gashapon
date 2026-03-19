@@ -1,5 +1,5 @@
 import { Args, Flags } from '@oclif/core'
-import { execSync } from 'node:child_process'
+import { execFileSync } from 'node:child_process'
 import { BaseCommand } from '../base-command.js'
 import { buildReceipt } from '../output/receipt.js'
 
@@ -28,7 +28,7 @@ export default class RegisterCli extends BaseCommand<typeof RegisterCli> {
 
     // Warn if binary not found on PATH
     try {
-      execSync(`which ${name}`, { stdio: 'ignore' })
+      execFileSync('which', [name], { stdio: 'ignore' })
     } catch {
       process.stderr.write(`Warning: "${name}" not found on PATH — registering anyway\n`)
     }

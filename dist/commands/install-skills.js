@@ -80,12 +80,17 @@ async function writeSkill(skillPath, content) {
     await fs.writeFile(skillPath, content, 'utf8');
     process.stderr.write(`Wrote skill: ${skillPath}\n`);
 }
+/** Safely encode a string as a double-quoted YAML scalar value. */
+function yamlQuote(s) {
+    const sanitized = s.replace(/\n/g, ' ').replace(/\r/g, '');
+    return '"' + sanitized.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
+}
 function buildMcpSkillContent(serverName, description) {
     const binName = wrapperName(serverName);
     const desc = description ?? `${serverName} MCP server`;
     return `---
 name: ${binName}
-description: ${desc}
+description: ${yamlQuote(desc)}
 ---
 
 \`${binName}\` is available for interacting with ${serverName}. Run \`${binName} --help\` to discover available commands.
@@ -96,7 +101,7 @@ function buildToolSkillContent(name, description, helpHint) {
     const hint = helpHint ?? `${name} --help`;
     return `---
 name: ${name}
-description: ${desc}
+description: ${yamlQuote(desc)}
 ---
 
 \`${name}\` is available on this machine. Run \`${hint}\` to discover available commands.

@@ -43,6 +43,12 @@ export class FileTokenStore {
     await this.save({ ...data, tokens })
   }
 
+  async clearTokens(): Promise<void> {
+    const data = await this.load()
+    delete data.tokens
+    await this.save(data)
+  }
+
   async getClientInfo(): Promise<OAuthClientInformationMixed | undefined> {
     return (await this.load()).client_info
   }
