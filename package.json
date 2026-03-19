@@ -15,7 +15,6 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsx src/index.ts",
-    "prepack": "tsc -p tsconfig.json",
     "test": "vitest run",
     "test:watch": "vitest",
     "coverage": "vitest run --coverage"
