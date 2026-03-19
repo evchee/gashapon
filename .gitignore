@@ -1,5 +1,6 @@
 node_modules/
 *.js.map
+dist/**/*.d.ts
 .DS_Store
 .env
 coverage/
