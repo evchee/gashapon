@@ -79,7 +79,7 @@ export default class Auth extends BaseCommand<typeof Auth> {
     }
 
     // --- Authorization Code + PKCE (interactive) ---
-    const port = await findFreePort()
+    const port = serverConfig.oauth?.callback_port ?? await findFreePort()
     const provider = new CliOAuthProvider(store, oauthConfig, port)
 
     await provider.startServer()

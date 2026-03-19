@@ -38,7 +38,7 @@ export async function createTransport(serverName, serverConfig) {
         else {
             // authorization_code: use file-backed provider with stored tokens
             const store = new FileTokenStore(serverName);
-            const port = await findFreePort();
+            const port = oauthConfig.callback_port ?? await findFreePort();
             authProvider = new CliOAuthProvider(store, oauthConfig, port);
         }
     }

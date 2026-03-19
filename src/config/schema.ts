@@ -21,6 +21,7 @@ export const OAuthConfigSchema = z.object({
   client_id: z.string().optional(),
   client_secret: z.string().optional(),
   scope: z.string().optional(),
+  callback_port: z.number().int().min(1).max(65535).optional(),
 })
 
 export const HttpServerConfigSchema = z.object({
