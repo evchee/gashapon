@@ -13,7 +13,7 @@ But gashapon isn't only for MCP servers. You probably already have powerful CLI 
 The pattern is the same for both:
 - MCP server tools become subcommands of a named `_capsule` binary (e.g. `slack_capsule search messages`)
 - Existing CLIs are registered as-is under their own name (e.g. `jira`, `confluence`)
-- A minimal Claude Code skill file tells the agent each tool exists; the rest is self-discovered by running `--help`
+- A minimal skill file tells Claude Code and Codex CLI each tool exists; the rest is self-discovered by running `--help`
 - Zero token overhead until the agent actually needs the tool
 
 ---
@@ -58,7 +58,7 @@ source ~/.zshrc       # or restart your shell
 | **server** | An MCP server registered in gashapon config |
 | **capsule** | A generated `<name>_capsule` shell script that wraps an MCP server as a CLI binary |
 | **tool** | An existing CLI binary registered for skill management |
-| **skill** | A minimal `SKILL.md` file that tells Claude Code a capsule or tool exists |
+| **skill** | A minimal `SKILL.md` file that tells Claude Code or Codex CLI a capsule or tool exists |
 
 ---
 
@@ -147,16 +147,18 @@ gashapon unregister-cli jira
 
 ---
 
-## Claude Code skills
+## Agent skills (Claude Code & Codex CLI)
 
-Skills tell Claude Code that a tool exists. They are intentionally minimal — one file, a description, and a pointer to `--help`. The agent discovers the full command surface on demand by running the binary.
+Skills tell Claude Code and Codex CLI that a tool exists. They are intentionally minimal — one file, a description, and a pointer to `--help`. The agent discovers the full command surface on demand by running the binary.
 
 Generate skill files for all installed servers and registered tools:
 
 ```sh
-gashapon install-skills                        # writes to .claude/skills/ in current dir
+gashapon install-skills                        # writes to .claude/skills/ + .agents/skills/
+gashapon install-skills --target claude        # Claude Code only (.claude/skills/)
+gashapon install-skills --target codex         # Codex CLI only (.agents/skills/)
 gashapon install-skills slack                  # single server or tool
-gashapon install-skills --dest /path/to/proj/.claude/skills
+gashapon install-skills --dest /custom/path    # custom destination (overrides --target)
 gashapon install-skills --force                # overwrite existing
 ```
 
@@ -248,6 +250,6 @@ OAuth tokens are stored separately at `~/.config/gashapon/tokens/<name>.json`.
 | `gashapon list` | List configured servers |
 | `gashapon register-cli <name>` | Register an existing CLI tool |
 | `gashapon unregister-cli <name>` | Remove a registered CLI tool |
-| `gashapon install-skills [name]` | Write Claude Code skill files |
+| `gashapon install-skills [name]` | Write skill files (Claude Code + Codex CLI) |
 | `gashapon context` | Show inventory of managed tools |
 | `gashapon agent-help` | Print agent onboarding guide |

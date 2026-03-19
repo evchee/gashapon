@@ -2,14 +2,16 @@ import { Args, Flags } from '@oclif/core';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { BaseCommand } from '../base-command.js';
-import { wrapperName } from '../config/paths.js';
+import { wrapperName, resolveSkillDestinations } from '../config/paths.js';
 import { notFound } from '../output/errors.js';
 import { buildReceipt } from '../output/receipt.js';
 export default class InstallSkills extends BaseCommand {
-    static description = 'Install Claude Code skills for MCP servers and registered CLI tools into the current project';
+    static description = 'Install skill files for MCP servers and registered CLI tools (Claude Code and Codex CLI)';
     static examples = [
         '<%= config.bin %> install-skills',
         '<%= config.bin %> install-skills slack',
+        '<%= config.bin %> install-skills --target codex',
+        '<%= config.bin %> install-skills --target claude',
         '<%= config.bin %> install-skills --dest ./my-project/.claude/skills',
     ];
     static args = {
@@ -17,9 +19,13 @@ export default class InstallSkills extends BaseCommand {
     };
     static flags = {
         ...BaseCommand.baseFlags,
+        target: Flags.string({
+            summary: 'Skill target(s) to write to',
+            default: 'all',
+            options: ['claude', 'codex', 'all'],
+        }),
         dest: Flags.string({
-            summary: 'Destination skills directory',
-            default: '.claude/skills',
+            summary: 'Custom destination directory (overrides --target)',
         }),
         force: Flags.boolean({
             summary: 'Overwrite existing skill files',
@@ -31,6 +37,7 @@ export default class InstallSkills extends BaseCommand {
         const servers = await this.configManager.listServers();
         const tools = await this.configManager.listTools();
         const installed = [];
+        const destinations = resolveSkillDestinations(flags.target, flags.dest);
         // MCP servers
         const serverNames = args.name
             ? (servers[args.name] ? [args.name] : [])
@@ -39,13 +46,15 @@ export default class InstallSkills extends BaseCommand {
             throw notFound(`"${args.name}"`, ['Run `gashapon list` to see available servers and tools']);
         }
         for (const name of serverNames) {
-            const skillPath = path.join(flags.dest, wrapperName(name), 'SKILL.md');
-            if (!flags.force && await fileExists(skillPath)) {
-                process.stderr.write(`Skill for "${name}" already exists at ${skillPath} (use --force to overwrite)\n`);
-                continue;
-            }
             const content = buildMcpSkillContent(name, servers[name].description);
-            await writeSkill(skillPath, content);
+            for (const dest of destinations) {
+                const skillPath = path.join(dest, wrapperName(name), 'SKILL.md');
+                if (!flags.force && await fileExists(skillPath)) {
+                    process.stderr.write(`Skill for "${name}" already exists at ${skillPath} (use --force to overwrite)\n`);
+                    continue;
+                }
+                await writeSkill(skillPath, content);
+            }
             installed.push(wrapperName(name));
         }
         // Registered CLI tools
@@ -53,14 +62,16 @@ export default class InstallSkills extends BaseCommand {
             ? (tools[args.name] ? [args.name] : [])
             : Object.keys(tools);
         for (const name of toolNames) {
-            const skillPath = path.join(flags.dest, name, 'SKILL.md');
-            if (!flags.force && await fileExists(skillPath)) {
-                process.stderr.write(`Skill for "${name}" already exists at ${skillPath} (use --force to overwrite)\n`);
-                continue;
-            }
             const { description, help_hint } = tools[name];
             const content = buildToolSkillContent(name, description, help_hint);
-            await writeSkill(skillPath, content);
+            for (const dest of destinations) {
+                const skillPath = path.join(dest, name, 'SKILL.md');
+                if (!flags.force && await fileExists(skillPath)) {
+                    process.stderr.write(`Skill for "${name}" already exists at ${skillPath} (use --force to overwrite)\n`);
+                    continue;
+                }
+                await writeSkill(skillPath, content);
+            }
             installed.push(name);
         }
         this.outputData(buildReceipt('install-skills', installed.join(', ') || '(none)'));
