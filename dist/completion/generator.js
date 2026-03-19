@@ -51,5 +51,10 @@ _${name}
 `;
 }
 function generateFish(name, commands) {
-    return commands.map(c => `complete -c ${name} -f -a '${c}' -d '${c}'`).join('\n') + '\n';
+    return commands.map(c => {
+        // Fish single-quoted strings suppress all expansions; the only character
+        // that needs escaping inside single quotes is a literal single-quote (').
+        const escaped = c.replace(/'/g, "'\\''");
+        return `complete -c ${name} -f -a '${escaped}' -d '${escaped}'`;
+    }).join('\n') + '\n';
 }

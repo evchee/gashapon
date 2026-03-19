@@ -2,7 +2,6 @@ import { Command, Flags } from '@oclif/core';
 import { ConfigManager } from './config/manager.js';
 import { StructuredError } from './output/errors.js';
 import { EXIT } from './output/exit-codes.js';
-import { isTTY } from './util/tty.js';
 export class BaseCommand extends Command {
     static baseFlags = {
         debug: Flags.boolean({
@@ -32,10 +31,12 @@ export class BaseCommand extends Command {
     }
     /**
      * Output data respecting --json, --quiet, and TTY detection.
+     * --json always wins and guarantees machine-readable output.
+     * --quiet (without --json) prints bare values.
      * JSON goes to stdout; decorative text to stderr.
      */
     outputData(data) {
-        if (this.isJson() || !isTTY()) {
+        if (this.isJson()) {
             process.stdout.write(JSON.stringify(data, null, 2) + '\n');
         }
         else if (this.isQuiet()) {

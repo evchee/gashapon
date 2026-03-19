@@ -43,10 +43,12 @@ export abstract class BaseCommand<T extends typeof Command> extends Command {
 
   /**
    * Output data respecting --json, --quiet, and TTY detection.
+   * --json always wins and guarantees machine-readable output.
+   * --quiet (without --json) prints bare values.
    * JSON goes to stdout; decorative text to stderr.
    */
   protected outputData(data: unknown): void {
-    if (this.isJson() || !isTTY()) {
+    if (this.isJson()) {
       process.stdout.write(JSON.stringify(data, null, 2) + '\n')
     } else if (this.isQuiet()) {
       this.logBare(data)

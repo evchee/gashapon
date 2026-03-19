@@ -89,12 +89,18 @@ async function writeSkill(skillPath: string, content: string): Promise<void> {
   process.stderr.write(`Wrote skill: ${skillPath}\n`)
 }
 
+/** Safely encode a string as a double-quoted YAML scalar value. */
+function yamlQuote(s: string): string {
+  const sanitized = s.replace(/\n/g, ' ').replace(/\r/g, '')
+  return '"' + sanitized.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"'
+}
+
 function buildMcpSkillContent(serverName: string, description: string | undefined): string {
   const binName = wrapperName(serverName)
   const desc = description ?? `${serverName} MCP server`
   return `---
 name: ${binName}
-description: ${desc}
+description: ${yamlQuote(desc)}
 ---
 
 \`${binName}\` is available for interacting with ${serverName}. Run \`${binName} --help\` to discover available commands.
@@ -106,7 +112,7 @@ function buildToolSkillContent(name: string, description: string | undefined, he
   const hint = helpHint ?? `${name} --help`
   return `---
 name: ${name}
-description: ${desc}
+description: ${yamlQuote(desc)}
 ---
 
 \`${name}\` is available on this machine. Run \`${hint}\` to discover available commands.

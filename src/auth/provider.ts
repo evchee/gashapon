@@ -98,7 +98,7 @@ export class CliOAuthProvider implements OAuthClientProvider {
     if (scope === 'all') {
       await this.store.clear()
     } else if (scope === 'tokens') {
-      await this.store.saveTokens(undefined as unknown as OAuthTokens)
+      await this.store.clearTokens()
     }
     // For other scopes we just clear everything to be safe
     else {

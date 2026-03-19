@@ -19,7 +19,7 @@ export class ConfigManager {
         }
         catch (err) {
             if (err.code === 'ENOENT') {
-                return { ...DEFAULT_CONFIG, servers: {} };
+                return { ...DEFAULT_CONFIG, tools: { ...DEFAULT_CONFIG.tools }, servers: {} };
             }
             throw err;
         }

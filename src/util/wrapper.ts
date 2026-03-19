@@ -23,11 +23,16 @@ function resolveGashaponBin(): string {
   return 'gashapon'
 }
 
+/** Wrap a path in single-quotes for use in a POSIX sh script, escaping any embedded single-quotes. */
+function shSingleQuote(s: string): string {
+  return "'" + s.replace(/'/g, "'\\''") + "'"
+}
+
 export async function generateWrapper(binDir: string, serverName: string): Promise<void> {
   await fs.mkdir(binDir, { recursive: true })
   const gashaponBin = resolveGashaponBin()
   const wrapperPath = path.join(binDir, wrapperName(serverName))
-  const content = `#!/bin/sh\nexec ${gashaponBin} exec ${serverName} "$@"\n`
+  const content = `#!/bin/sh\nexec ${shSingleQuote(gashaponBin)} exec ${serverName} "$@"\n`
   await fs.writeFile(wrapperPath, content, { mode: 0o755 })
 }
 

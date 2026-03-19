@@ -11,7 +11,7 @@ function resolve(p) {
 }
 export function configDir() {
     const xdg = process.env.XDG_CONFIG_HOME;
-    const base = xdg ? xdg : path.join(os.homedir(), '.config');
+    const base = xdg && path.isAbsolute(xdg) ? xdg : path.join(os.homedir(), '.config');
     return resolve(path.join(base, 'gashapon'));
 }
 export function configPath() {
@@ -19,7 +19,7 @@ export function configPath() {
 }
 export function cacheDir() {
     const xdg = process.env.XDG_CACHE_HOME;
-    const base = xdg ? xdg : path.join(os.homedir(), '.cache');
+    const base = xdg && path.isAbsolute(xdg) ? xdg : path.join(os.homedir(), '.cache');
     return resolve(path.join(base, 'gashapon'));
 }
 export function serverCacheDir(serverName) {

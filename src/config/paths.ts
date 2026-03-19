@@ -15,7 +15,7 @@ function resolve(p: string): string {
 
 export function configDir(): string {
   const xdg = process.env.XDG_CONFIG_HOME
-  const base = xdg ? xdg : path.join(os.homedir(), '.config')
+  const base = xdg && path.isAbsolute(xdg) ? xdg : path.join(os.homedir(), '.config')
   return resolve(path.join(base, 'gashapon'))
 }
 
@@ -25,7 +25,7 @@ export function configPath(): string {
 
 export function cacheDir(): string {
   const xdg = process.env.XDG_CACHE_HOME
-  const base = xdg ? xdg : path.join(os.homedir(), '.cache')
+  const base = xdg && path.isAbsolute(xdg) ? xdg : path.join(os.homedir(), '.cache')
   return resolve(path.join(base, 'gashapon'))
 }
 
