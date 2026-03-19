@@ -56,9 +56,10 @@ export default class Add extends BaseCommand<typeof Add> {
     let serverConfig: ServerConfig
 
     // Check for passthrough style: capsule add <name> -- <command> [args...]
-    const separatorIdx = (argv as string[]).indexOf('--')
-    if (separatorIdx !== -1) {
-      const passthrough = (argv as string[]).slice(separatorIdx + 1)
+    // Note: oclif consumes '--' before we see it in argv, so we check process.argv directly
+    const rawSeparatorIdx = process.argv.indexOf('--')
+    if (rawSeparatorIdx !== -1) {
+      const passthrough = process.argv.slice(rawSeparatorIdx + 1)
       if (passthrough.length === 0) throw usageError('Command required after --')
       const [cmd, ...cmdArgs] = passthrough
       const envMap = parseKeyVal(flags.env ?? [])

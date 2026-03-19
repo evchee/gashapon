@@ -1,31 +1,34 @@
-import { Args } from '@oclif/core'
-import { BaseCommand } from '../base-command.js'
+import { Command } from '@oclif/core'
 import { ExecutionEngine } from '../runtime/engine.js'
 import { SchemaCache } from '../mcp/cache.js'
+import { ConfigManager } from '../config/manager.js'
 
-export default class Exec extends BaseCommand<typeof Exec> {
+export default class Exec extends Command {
   static description = 'Execute a tool on an MCP server (used by wrapper scripts)'
   static hidden = true
   static strict = false
+  static enableJsonFlag = false
 
-  static args = {
-    server: Args.string({ description: 'Server name', required: true }),
-  }
+  static args = {}
+  static flags = {}
 
-  static flags = {
-    ...BaseCommand.baseFlags,
+  // Skip BaseCommand.init() to avoid oclif rejecting unknown --flags (tool flags)
+  public async init(): Promise<void> {
+    await super.init()
   }
 
   async run(): Promise<void> {
-    const { args, argv } = await this.parse(Exec)
-    const serverName = args.server
-    // Remove 'exec' and server name from argv to get remaining args
-    const rawArgv = process.argv.slice(3) // skip: node, bin/run.js, 'exec'
-    // Actually we need to find what comes after the server name
-    const serverIdx = (argv as string[]).indexOf(serverName)
-    const remainingArgv = (argv as string[]).slice(serverIdx + 1)
+    // Parse argv directly from process.argv to avoid oclif flag validation
+    // process.argv = ['node', 'run.js', 'exec', '<server>', ...toolArgs]
+    const serverName = process.argv[3]
+    if (!serverName) {
+      process.stderr.write('Usage: capsule exec <server> [args...]\n')
+      process.exit(2)
+    }
+    const toolArgv = process.argv.slice(4)
 
-    const engine = new ExecutionEngine(this.configManager, new SchemaCache())
-    await engine.execute(serverName, remainingArgv)
+    const configManager = new ConfigManager()
+    const engine = new ExecutionEngine(configManager, new SchemaCache())
+    await engine.execute(serverName, toolArgv)
   }
 }
