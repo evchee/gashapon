@@ -2,7 +2,6 @@ import { Args, Flags } from '@oclif/core';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { BaseCommand } from '../base-command.js';
-import { SchemaCache } from '../mcp/cache.js';
 import { wrapperName } from '../config/paths.js';
 import { notFound } from '../output/errors.js';
 import { buildReceipt } from '../output/receipt.js';
@@ -42,11 +41,9 @@ export default class InstallSkills extends BaseCommand {
                     names.push(name);
             }
         }
-        const cache = new SchemaCache();
         const installed = [];
         for (const name of names) {
-            const cached = await cache.get(name);
-            const skillContent = buildSkillContent(name, servers[name].description, cached?.tools ?? []);
+            const skillContent = buildSkillContent(name, servers[name].description);
             const skillDir = path.join(flags.dest, wrapperName(name));
             const skillPath = path.join(skillDir, 'SKILL.md');
             let exists = false;
@@ -67,35 +64,14 @@ export default class InstallSkills extends BaseCommand {
         this.outputData(buildReceipt('install-skills', installed.join(', ') || '(none)'));
     }
 }
-function buildSkillContent(serverName, description, tools) {
+function buildSkillContent(serverName, description) {
     const binName = wrapperName(serverName);
     const desc = description ?? `${serverName} MCP server`;
-    const toolLines = tools.map(t => {
-        const summary = t.description?.split('\n')[0].slice(0, 100) ?? '';
-        return `- \`${binName} ${t.name.replaceAll('_', ' ')}\`: ${summary}`;
-    }).join('\n');
     return `---
 name: ${binName}
-description: Use ${binName} to interact with ${desc}. Invoke this skill when the user asks about ${serverName}.
+description: ${desc}
 ---
 
-# ${binName}
-
-\`${binName}\` is a CLI tool that wraps the **${serverName}** MCP server. Use it when the user asks you to interact with ${serverName}.
-
-## When to use
-
-Use \`${binName}\` when the user asks you to read, search, send, or otherwise interact with ${serverName}.
-
-## Available commands
-
-${toolLines || `Run \`${binName} --help\` to see available commands.`}
-
-## Usage
-
-\`\`\`sh
-${binName} <command> [flags]
-${binName} --help
-\`\`\`
+\`${binName}\` is available for interacting with ${serverName}. Run \`${binName} --help\` to discover available commands.
 `;
 }
