@@ -1,27 +1,29 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import type { NounVerbMapping } from '../runtime/mapping.js'
-import { completionsDir } from '../config/paths.js'
+import { completionsDir, wrapperName } from '../config/paths.js'
 
 export async function generateCompletions(serverName: string, mapping: NounVerbMapping): Promise<void> {
   const dir = completionsDir()
   await fs.mkdir(dir, { recursive: true })
 
+  const name = wrapperName(serverName)
   const commands = Object.keys(mapping.forward)
 
-  const bash = generateBash(serverName, commands)
-  const zsh = generateZsh(serverName, commands)
-  const fish = generateFish(serverName, commands)
+  const bash = generateBash(name, commands)
+  const zsh = generateZsh(name, commands)
+  const fish = generateFish(name, commands)
 
-  await fs.writeFile(path.join(dir, `${serverName}.bash`), bash, 'utf8')
-  await fs.writeFile(path.join(dir, `${serverName}.zsh`), zsh, 'utf8')
-  await fs.writeFile(path.join(dir, `${serverName}.fish`), fish, 'utf8')
+  await fs.writeFile(path.join(dir, `${name}.bash`), bash, 'utf8')
+  await fs.writeFile(path.join(dir, `${name}.zsh`), zsh, 'utf8')
+  await fs.writeFile(path.join(dir, `${name}.fish`), fish, 'utf8')
 }
 
 export async function removeCompletions(serverName: string): Promise<void> {
   const dir = completionsDir()
+  const name = wrapperName(serverName)
   for (const ext of ['bash', 'zsh', 'fish']) {
-    await fs.unlink(path.join(dir, `${serverName}.${ext}`)).catch(() => {})
+    await fs.unlink(path.join(dir, `${name}.${ext}`)).catch(() => {})
   }
 }
 

@@ -4,6 +4,7 @@ import { OutputFormatter } from './formatter.js';
 import { MCPClientWrapper } from '../mcp/client.js';
 import { EXIT } from '../output/exit-codes.js';
 import { StructuredError, notFound, upstreamError } from '../output/errors.js';
+import { wrapperName } from '../config/paths.js';
 export class ExecutionEngine {
     configManager;
     cache;
@@ -212,7 +213,7 @@ export class ExecutionEngine {
         process.stdout.write(JSON.stringify(result, null, 2) + '\n');
     }
     outputHelp(serverName, mapping) {
-        const lines = [`Usage: ${serverName} <command> [flags]`, '', 'Commands:'];
+        const lines = [`Usage: ${wrapperName(serverName)} <command> [flags]`, '', 'Commands:'];
         for (const [noun, verbs] of Object.entries(mapping.tree)) {
             if (noun === '_root') {
                 for (const [verb, info] of Object.entries(verbs)) {

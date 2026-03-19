@@ -45,3 +45,8 @@ export function tokenPath(serverName: string): string {
 export function completionsDir(): string {
   return path.join(resolve('~/.gashapon'), 'completions')
 }
+
+/** The bin name for a server's generated wrapper, e.g. "slack" → "slack_capsule" */
+export function wrapperName(serverName: string): string {
+  return `${serverName}_capsule`
+}

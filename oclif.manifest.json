@@ -283,6 +283,59 @@
         "exec.js"
       ]
     },
+    "init": {
+      "aliases": [],
+      "args": {},
+      "description": "Add gashapon bin directory to PATH in your shell config",
+      "examples": [
+        "<%= config.bin %> init",
+        "<%= config.bin %> init --print"
+      ],
+      "flags": {
+        "json": {
+          "description": "Format output as json.",
+          "helpGroup": "GLOBAL",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "debug": {
+          "helpGroup": "GLOBAL",
+          "name": "debug",
+          "summary": "Enable debug output (raw JSON-RPC, stack traces)",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "quiet": {
+          "char": "q",
+          "helpGroup": "GLOBAL",
+          "name": "quiet",
+          "summary": "Output bare values only",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "print": {
+          "name": "print",
+          "summary": "Print the export line instead of writing to shell config",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "init",
+      "pluginAlias": "gashapon",
+      "pluginName": "gashapon",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": true,
+      "isESM": true,
+      "relativePath": [
+        "dist",
+        "commands",
+        "init.js"
+      ]
+    },
     "install": {
       "aliases": [],
       "args": {

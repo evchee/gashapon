@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { execSync } from 'node:child_process'
+import { wrapperName } from '../config/paths.js'
 
 /**
  * Resolve the absolute path to the gashapon binary.
@@ -25,12 +26,12 @@ function resolveGashaponBin(): string {
 export async function generateWrapper(binDir: string, serverName: string): Promise<void> {
   await fs.mkdir(binDir, { recursive: true })
   const gashaponBin = resolveGashaponBin()
-  const wrapperPath = path.join(binDir, serverName)
+  const wrapperPath = path.join(binDir, wrapperName(serverName))
   const content = `#!/bin/sh\nexec ${gashaponBin} exec ${serverName} "$@"\n`
   await fs.writeFile(wrapperPath, content, { mode: 0o755 })
 }
 
 export async function removeWrapper(binDir: string, serverName: string): Promise<void> {
-  const wrapperPath = path.join(binDir, serverName)
+  const wrapperPath = path.join(binDir, wrapperName(serverName))
   await fs.unlink(wrapperPath)
 }

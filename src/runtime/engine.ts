@@ -7,6 +7,7 @@ import { SchemaCache } from '../mcp/cache.js'
 import { ConfigManager } from '../config/manager.js'
 import { EXIT } from '../output/exit-codes.js'
 import { StructuredError, notFound, upstreamError } from '../output/errors.js'
+import { wrapperName } from '../config/paths.js'
 import type { Tool } from '@modelcontextprotocol/sdk/types.js'
 
 export class ExecutionEngine {
@@ -240,7 +241,7 @@ export class ExecutionEngine {
   }
 
   private outputHelp(serverName: string, mapping: NounVerbMapping): void {
-    const lines: string[] = [`Usage: ${serverName} <command> [flags]`, '', 'Commands:']
+    const lines: string[] = [`Usage: ${wrapperName(serverName)} <command> [flags]`, '', 'Commands:']
     for (const [noun, verbs] of Object.entries(mapping.tree)) {
       if (noun === '_root') {
         for (const [verb, info] of Object.entries(verbs)) {
