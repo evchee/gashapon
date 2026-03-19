@@ -4,6 +4,22 @@ import { ServerConfigSchema, type ServerConfig } from '../config/schema.js'
 import { buildReceipt } from '../output/receipt.js'
 import { usageError } from '../output/errors.js'
 
+// Well-known server presets that require specific configuration
+const WELL_KNOWN_SERVERS: Record<string, ServerConfig> = {
+  slack: {
+    transport: 'http',
+    url: 'https://mcp.slack.com/mcp',
+    headers: {},
+    oauth: {
+      grant_type: 'authorization_code',
+      client_id: '1601185624273.8899143856786',
+      callback_port: 3118,
+    },
+    installed: false,
+    description: 'Slack MCP server',
+  },
+}
+
 export default class Add extends BaseCommand<typeof Add> {
   static description = 'Register an MCP server in gashapon config'
 
@@ -63,6 +79,18 @@ export default class Add extends BaseCommand<typeof Add> {
     }
 
     let serverConfig: ServerConfig
+
+    // Check for well-known server preset
+    if (name in WELL_KNOWN_SERVERS && process.argv.indexOf('--') === -1 && !flags.url && !flags.command && !flags.transport) {
+      serverConfig = WELL_KNOWN_SERVERS[name]
+      if (flags.force) {
+        await this.configManager.forceAddServer(name, serverConfig)
+      } else {
+        await this.configManager.addServer(name, serverConfig)
+      }
+      this.outputData(buildReceipt('add', name, `gashapon remove ${name}`))
+      return
+    }
 
     // Check for passthrough style: gashapon add <name> -- <command> [args...]
     // Note: oclif consumes '--' before we see it in argv, so we check process.argv directly
