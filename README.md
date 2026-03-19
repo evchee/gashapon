@@ -1,6 +1,6 @@
 # gashapon
 
-> Wrap MCP servers as independent CLI binaries. Keep your AI agents lean.
+> A tool dispenser for AI agents. MCP servers and existing CLIs, served as lean shell commands.
 
 ## Why
 
@@ -8,12 +8,13 @@ MCP servers are powerful, but loading them all into an AI agent's context has a 
 
 **gashapon** takes a different approach: instead of connecting MCP servers directly to your AI client, it wraps them as standalone CLI binaries on your machine. The agent calls them like any other shell command — no persistent connection, no context overhead, no tool list bloat.
 
-The pattern is simple:
-- MCP server tools become subcommands of a named binary (e.g. `slack_capsule search messages`)
-- The agent discovers what's available by running `--help` — only when it needs to
-- A minimal Claude Code skill file tells the agent the tool exists; the rest is self-discovered on demand
+But gashapon isn't only for MCP servers. You probably already have powerful CLI tools installed — `jira`, `confluence`, `gh`, `kubectl`, custom internal tools — that your AI agent has no idea exist. gashapon dispenses those too: register any existing CLI and it gets the same minimal skill file, so the agent knows it's available and can discover how to use it on demand.
 
-This also makes it easy to give agents access to existing CLI tools (jira, confluence-cli, etc.) using the same skill management system, even if they have no MCP server at all.
+The pattern is the same for both:
+- MCP server tools become subcommands of a named `_capsule` binary (e.g. `slack_capsule search messages`)
+- Existing CLIs are registered as-is under their own name (e.g. `jira`, `confluence`)
+- A minimal Claude Code skill file tells the agent each tool exists; the rest is self-discovered by running `--help`
+- Zero token overhead until the agent actually needs the tool
 
 ---
 
@@ -55,9 +56,9 @@ source ~/.zshrc       # or restart your shell
 | Term | What it is |
 |---|---|
 | **server** | An MCP server registered in gashapon config |
-| **wrapper** (capsule) | A generated `<name>_capsule` shell script that invokes `gashapon exec` |
-| **tool** | A regular CLI binary registered for skill management only |
-| **skill** | A minimal `SKILL.md` file that tells Claude Code a tool exists |
+| **capsule** | A generated `<name>_capsule` shell script that wraps an MCP server as a CLI binary |
+| **tool** | An existing CLI binary registered for skill management |
+| **skill** | A minimal `SKILL.md` file that tells Claude Code a capsule or tool exists |
 
 ---
 
@@ -98,9 +99,9 @@ gashapon auth slack    # opens browser, completes OAuth flow, stores tokens
 gashapon install slack
 ```
 
-This connects to the MCP server, discovers all available tools, and writes a `slack_capsule` binary to `~/.gashapon/bin/`. The tool schema is cached locally so subsequent invocations don't reconnect.
+This connects to the MCP server, discovers all available tools, and writes a **capsule** — a `slack_capsule` binary in `~/.gashapon/bin/`. The tool schema is cached locally so subsequent invocations don't reconnect.
 
-### 4. Use it
+### 4. Use the capsule
 
 ```sh
 slack_capsule --help                          # list all available commands
@@ -124,16 +125,20 @@ gashapon remove slack      # remove from config entirely
 
 ---
 
-## Managing existing CLI tools
+## Dispensing existing CLI tools
 
-gashapon can also manage Claude Code skills for CLI tools that already exist on your machine — no MCP server required.
+You don't need an MCP server to benefit from gashapon. If a CLI already exists on your machine, register it and gashapon will manage its skill file — making it visible to your AI agent with zero extra setup.
 
 ```sh
 gashapon register-cli confluence -d "Confluence page management"
 gashapon register-cli jira -d "Jira issue tracking" --help-hint "jira issue --help"
+gashapon register-cli gh -d "GitHub CLI"
+gashapon register-cli kubectl -d "Kubernetes cluster management"
 ```
 
-`--help-hint` customises the command Claude will be told to run for self-discovery (defaults to `<name> --help`).
+The agent will be told the tool exists and exactly which command to run to learn more. `--help-hint` lets you point it at the most useful entry point (defaults to `<name> --help`).
+
+Run `gashapon install-skills` afterward to write the skill files for the current project.
 
 To remove:
 ```sh
@@ -155,7 +160,7 @@ gashapon install-skills --dest /path/to/proj/.claude/skills
 gashapon install-skills --force                # overwrite existing
 ```
 
-A generated skill looks like:
+A generated skill for a capsule looks like:
 
 ```markdown
 ---
@@ -236,8 +241,8 @@ OAuth tokens are stored separately at `~/.config/gashapon/tokens/<name>.json`.
 | `gashapon init` | Write `export PATH` for the bin dir to your shell config |
 | `gashapon add <name>` | Register an MCP server |
 | `gashapon auth <name>` | OAuth login for an HTTP server |
-| `gashapon install <name>` | Discover tools and write wrapper binary |
-| `gashapon uninstall <name>` | Remove wrapper and cache |
+| `gashapon install <name>` | Discover tools and write capsule binary |
+| `gashapon uninstall <name>` | Remove capsule and cache |
 | `gashapon remove <name>` | Remove server from config |
 | `gashapon sync [name\|--all]` | Re-discover tools and refresh cache |
 | `gashapon list` | List configured servers |
