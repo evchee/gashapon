@@ -2,7 +2,7 @@ import { BaseCommand } from '../base-command.js'
 import { SchemaCache } from '../mcp/cache.js'
 
 export default class Context extends BaseCommand<typeof Context> {
-  static description = 'Show inventory of all capsule-managed CLIs (for AI agents)'
+  static description = 'Show inventory of all gashapon-managed CLIs (for AI agents)'
 
   static flags = {
     ...BaseCommand.baseFlags,
@@ -35,8 +35,8 @@ export default class Context extends BaseCommand<typeof Context> {
     }
 
     const output = {
-      managed_by: 'capsule',
-      capsule_version: version,
+      managed_by: 'gashapon',
+      gashapon_version: version,
       config: this.configManager.path,
       clis,
       hint: 'Run `<binary> --capabilities` for full command list. All CLIs output JSON when stdout is not a TTY.',

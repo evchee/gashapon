@@ -1,6 +1,6 @@
 import os from 'node:os'
 import path from 'node:path'
-import type { CapsuleConfig } from './schema.js'
+import type { GashaponConfig } from './schema.js'
 
 function expandHome(p: string): string {
   if (p.startsWith('~/') || p === '~') {
@@ -16,7 +16,7 @@ function resolve(p: string): string {
 export function configDir(): string {
   const xdg = process.env.XDG_CONFIG_HOME
   const base = xdg ? xdg : path.join(os.homedir(), '.config')
-  return resolve(path.join(base, 'capsule'))
+  return resolve(path.join(base, 'gashapon'))
 }
 
 export function configPath(): string {
@@ -26,17 +26,17 @@ export function configPath(): string {
 export function cacheDir(): string {
   const xdg = process.env.XDG_CACHE_HOME
   const base = xdg ? xdg : path.join(os.homedir(), '.cache')
-  return resolve(path.join(base, 'capsule'))
+  return resolve(path.join(base, 'gashapon'))
 }
 
 export function serverCacheDir(serverName: string): string {
   return path.join(cacheDir(), serverName)
 }
 
-export function binDir(config: CapsuleConfig): string {
+export function binDir(config: GashaponConfig): string {
   return resolve(config.bin_dir)
 }
 
 export function completionsDir(): string {
-  return path.join(resolve('~/.capsule'), 'completions')
+  return path.join(resolve('~/.gashapon'), 'completions')
 }

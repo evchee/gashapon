@@ -25,7 +25,7 @@ export default class Install extends BaseCommand<typeof Install> {
     const name = args.name
 
     const serverConfig = await this.configManager.getServer(name)
-    if (!serverConfig) throw notFound(`Server "${name}"`, [`Run \`capsule list\` to see available servers`])
+    if (!serverConfig) throw notFound(`Server "${name}"`, [`Run \`gashapon list\` to see available servers`])
 
     if (serverConfig.installed && !flags.force) {
       this.log(`Server "${name}" is already installed. Use --force to reinstall.`)
@@ -58,10 +58,10 @@ export default class Install extends BaseCommand<typeof Install> {
 
     // PATH advisory
     if (!process.env.PATH?.split(':').includes(bd)) {
-      process.stderr.write(`\nAdd capsule bin to PATH:\n  export PATH="${bd}:$PATH"\n\n`)
+      process.stderr.write(`\nAdd gashapon bin to PATH:\n  export PATH="${bd}:$PATH"\n\n`)
     }
 
-    const receipt = buildReceipt('install', name, `capsule uninstall ${name}`)
+    const receipt = buildReceipt('install', name, `gashapon uninstall ${name}`)
     this.outputData(receipt)
   }
 }

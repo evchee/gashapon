@@ -29,19 +29,19 @@ export const ServerConfigSchema = z.discriminatedUnion('transport', [
   HttpServerConfigSchema,
 ])
 
-export const CapsuleConfigSchema = z.object({
+export const GashaponConfigSchema = z.object({
   version: z.literal('1'),
-  bin_dir: z.string().default('~/.capsule/bin'),
+  bin_dir: z.string().default('~/.gashapon/bin'),
   servers: z.record(ServerNameSchema, ServerConfigSchema).default({}),
 })
 
 export type StdioServerConfig = z.infer<typeof StdioServerConfigSchema>
 export type HttpServerConfig = z.infer<typeof HttpServerConfigSchema>
 export type ServerConfig = z.infer<typeof ServerConfigSchema>
-export type CapsuleConfig = z.infer<typeof CapsuleConfigSchema>
+export type GashaponConfig = z.infer<typeof GashaponConfigSchema>
 
-export const DEFAULT_CONFIG: CapsuleConfig = {
+export const DEFAULT_CONFIG: GashaponConfig = {
   version: '1',
-  bin_dir: '~/.capsule/bin',
+  bin_dir: '~/.gashapon/bin',
   servers: {},
 }

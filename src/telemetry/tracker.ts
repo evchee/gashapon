@@ -12,7 +12,7 @@ interface TelemetryEvent {
 }
 
 export async function trackEvent(event: TelemetryEvent): Promise<void> {
-  if (!process.env.CAPSULE_TELEMETRY) return
+  if (!process.env.GASHAPON_TELEMETRY) return
   const logPath = path.join(cacheDir(), 'telemetry.jsonl')
   const line = JSON.stringify(event) + '\n'
   try {

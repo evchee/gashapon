@@ -92,7 +92,7 @@ export abstract class BaseCommand<T extends typeof Command> extends Command {
       process.exit(err.exitCode)
     }
     const debugMode = (this.flags as { debug?: boolean } | undefined)?.debug
-    if (debugMode || process.env.CAPSULE_DEBUG) {
+    if (debugMode || process.env.GASHAPON_DEBUG) {
       process.stderr.write(err.stack ?? err.message)
       process.stderr.write('\n')
     }

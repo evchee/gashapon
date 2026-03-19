@@ -20,7 +20,7 @@ export class ExecutionEngine {
   async execute(serverName: string, argv: string[]): Promise<void> {
     const serverConfig = await this.configManager.getServer(serverName)
     if (!serverConfig) {
-      const err = notFound(`Server "${serverName}"`, ['Run `capsule list` to see available servers'])
+      const err = notFound(`Server "${serverName}"`, ['Run `gashapon list` to see available servers'])
       process.stdout.write(JSON.stringify(err.toJSON(), null, 2) + '\n')
       process.exit(EXIT.NOT_FOUND)
     }

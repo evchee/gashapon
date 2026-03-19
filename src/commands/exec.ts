@@ -22,7 +22,7 @@ export default class Exec extends Command {
     // process.argv = ['node', 'run.js', 'exec', '<server>', ...toolArgs]
     const serverName = process.argv[3]
     if (!serverName) {
-      process.stderr.write('Usage: capsule exec <server> [args...]\n')
+      process.stderr.write('Usage: gashapon exec <server> [args...]\n')
       process.exit(2)
     }
     const toolArgv = process.argv.slice(4)

@@ -34,7 +34,7 @@ export default class Uninstall extends BaseCommand<typeof Uninstall> {
 
     await this.configManager.updateServer(name, { installed: false })
 
-    const receipt = buildReceipt('uninstall', name, `capsule install ${name}`)
+    const receipt = buildReceipt('uninstall', name, `gashapon install ${name}`)
     this.outputData(receipt)
   }
 }

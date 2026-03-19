@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { CapsuleConfigSchema, ServerNameSchema, StdioServerConfigSchema } from '../../src/config/schema.js'
+import { GashaponConfigSchema, ServerNameSchema, StdioServerConfigSchema } from '../../src/config/schema.js'
 
 describe('ServerNameSchema', () => {
   it('accepts valid names', () => {
@@ -16,9 +16,9 @@ describe('ServerNameSchema', () => {
   })
 })
 
-describe('CapsuleConfigSchema', () => {
+describe('GashaponConfigSchema', () => {
   it('parses a valid config', () => {
-    const config = CapsuleConfigSchema.parse({
+    const config = GashaponConfigSchema.parse({
       version: '1',
       servers: {
         slack: { transport: 'stdio', command: 'npx', args: ['-y', '@slack/mcp-server'], env: {}, installed: false },
@@ -28,13 +28,13 @@ describe('CapsuleConfigSchema', () => {
   })
 
   it('uses defaults for missing fields', () => {
-    const config = CapsuleConfigSchema.parse({ version: '1' })
-    expect(config.bin_dir).toBe('~/.capsule/bin')
+    const config = GashaponConfigSchema.parse({ version: '1' })
+    expect(config.bin_dir).toBe('~/.gashapon/bin')
     expect(config.servers).toEqual({})
   })
 
   it('rejects invalid server names', () => {
-    expect(() => CapsuleConfigSchema.parse({
+    expect(() => GashaponConfigSchema.parse({
       version: '1',
       servers: { 'INVALID NAME': { transport: 'stdio', command: 'echo' } },
     })).toThrow()

@@ -83,11 +83,11 @@ describe('Agent-CLI Conformance: Noun-verb mapping', () => {
 describe('Agent-CLI Conformance: Receipt pattern', () => {
   it('buildReceipt returns correct shape', async () => {
     const { buildReceipt } = await import('../../src/output/receipt.js')
-    const r = buildReceipt('create', 'test-resource', 'capsule remove test-resource')
+    const r = buildReceipt('create', 'test-resource', 'gashapon remove test-resource')
     expect(r.success).toBe(true)
     expect(r.operation).toBe('create')
     expect(r.target).toBe('test-resource')
     expect(typeof r.timestamp).toBe('string')
-    expect(r.undo_command).toBe('capsule remove test-resource')
+    expect(r.undo_command).toBe('gashapon remove test-resource')
   })
 })

@@ -1,10 +1,10 @@
 {
-  "name": "capsule-cli",
+  "name": "gashapon",
   "version": "0.1.0",
   "description": "Wrap MCP servers as independent CLI binaries",
   "type": "module",
   "bin": {
-    "capsule": "./bin/run.js"
+    "gashapon": "./bin/run.js"
   },
   "main": "./dist/index.js",
   "files": ["bin", "dist", "oclif.manifest.json"],
@@ -35,8 +35,8 @@
     "vitest": "^3"
   },
   "oclif": {
-    "bin": "capsule",
-    "dirname": "capsule",
+    "bin": "gashapon",
+    "dirname": "gashapon",
     "commands": "./dist/commands",
     "plugins": [
       "@oclif/plugin-help",

@@ -5,7 +5,7 @@ import { buildReceipt } from '../output/receipt.js'
 import { usageError } from '../output/errors.js'
 
 export default class Add extends BaseCommand<typeof Add> {
-  static description = 'Register an MCP server in capsule config'
+  static description = 'Register an MCP server in gashapon config'
 
   static examples = [
     '<%= config.bin %> add slack -- npx -y @slack/mcp-server',
@@ -48,14 +48,14 @@ export default class Add extends BaseCommand<typeof Add> {
       } else {
         await this.configManager.addServer(name, serverConfig)
       }
-      const receipt = buildReceipt('add', name, `capsule remove ${name}`)
+      const receipt = buildReceipt('add', name, `gashapon remove ${name}`)
       this.outputData(receipt)
       return
     }
 
     let serverConfig: ServerConfig
 
-    // Check for passthrough style: capsule add <name> -- <command> [args...]
+    // Check for passthrough style: gashapon add <name> -- <command> [args...]
     // Note: oclif consumes '--' before we see it in argv, so we check process.argv directly
     const rawSeparatorIdx = process.argv.indexOf('--')
     if (rawSeparatorIdx !== -1) {
@@ -96,8 +96,8 @@ export default class Add extends BaseCommand<typeof Add> {
     } else {
       throw usageError(
         'Specify transport: use `-- <command>` for stdio, or `--url <url>` for http',
-        ['Example: capsule add myserver -- npx -y @my/mcp-server',
-          'Example: capsule add myserver --url https://mcp.example.com'],
+        ['Example: gashapon add myserver -- npx -y @my/mcp-server',
+          'Example: gashapon add myserver --url https://mcp.example.com'],
       )
     }
 
@@ -107,7 +107,7 @@ export default class Add extends BaseCommand<typeof Add> {
       await this.configManager.addServer(name, serverConfig)
     }
 
-    const receipt = buildReceipt('add', name, `capsule remove ${name}`)
+    const receipt = buildReceipt('add', name, `gashapon remove ${name}`)
     this.outputData(receipt)
   }
 }

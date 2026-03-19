@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { CapsuleConfigSchema, DEFAULT_CONFIG, ServerNameSchema, type CapsuleConfig, type ServerConfig } from './schema.js'
+import { GashaponConfigSchema, DEFAULT_CONFIG, ServerNameSchema, type GashaponConfig, type ServerConfig } from './schema.js'
 import { configPath } from './paths.js'
 import { conflict, notFound, usageError } from '../output/errors.js'
 
@@ -15,11 +15,11 @@ export class ConfigManager {
     return this._configPath
   }
 
-  async load(): Promise<CapsuleConfig> {
+  async load(): Promise<GashaponConfig> {
     try {
       const raw = await fs.readFile(this._configPath, 'utf8')
       const parsed = JSON.parse(raw)
-      return CapsuleConfigSchema.parse(parsed)
+      return GashaponConfigSchema.parse(parsed)
     } catch (err: unknown) {
       if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
         return { ...DEFAULT_CONFIG, servers: {} }
@@ -28,7 +28,7 @@ export class ConfigManager {
     }
   }
 
-  async save(config: CapsuleConfig): Promise<void> {
+  async save(config: GashaponConfig): Promise<void> {
     const dir = path.dirname(this._configPath)
     await fs.mkdir(dir, { recursive: true })
     const tmp = this._configPath + '.tmp'
@@ -36,25 +36,25 @@ export class ConfigManager {
     await fs.rename(tmp, this._configPath)
   }
 
-  async addServer(name: string, serverConfig: ServerConfig): Promise<CapsuleConfig> {
+  async addServer(name: string, serverConfig: ServerConfig): Promise<GashaponConfig> {
     const nameResult = ServerNameSchema.safeParse(name)
     if (!nameResult.success) {
       throw usageError(`Invalid server name "${name}": ${nameResult.error.issues[0].message}`)
     }
     const config = await this.load()
     if (config.servers[name]) {
-      throw conflict(`Server "${name}"`, [`Use --force to overwrite`, `Run \`capsule remove ${name}\` first`])
+      throw conflict(`Server "${name}"`, [`Use --force to overwrite`, `Run \`gashapon remove ${name}\` first`])
     }
     config.servers[name] = serverConfig
     await this.save(config)
     return config
   }
 
-  async removeServer(name: string): Promise<{ config: CapsuleConfig; removed: ServerConfig }> {
+  async removeServer(name: string): Promise<{ config: GashaponConfig; removed: ServerConfig }> {
     const config = await this.load()
     const removed = config.servers[name]
     if (!removed) {
-      throw notFound(`Server "${name}"`, [`Run \`capsule list\` to see available servers`])
+      throw notFound(`Server "${name}"`, [`Run \`gashapon list\` to see available servers`])
     }
     delete config.servers[name]
     await this.save(config)
@@ -71,7 +71,7 @@ export class ConfigManager {
     return config.servers
   }
 
-  async updateServer(name: string, updates: Partial<ServerConfig>): Promise<CapsuleConfig> {
+  async updateServer(name: string, updates: Partial<ServerConfig>): Promise<GashaponConfig> {
     const config = await this.load()
     if (!config.servers[name]) {
       throw notFound(`Server "${name}"`)
@@ -81,7 +81,7 @@ export class ConfigManager {
     return config
   }
 
-  async forceAddServer(name: string, serverConfig: ServerConfig): Promise<CapsuleConfig> {
+  async forceAddServer(name: string, serverConfig: ServerConfig): Promise<GashaponConfig> {
     const nameResult = ServerNameSchema.safeParse(name)
     if (!nameResult.success) {
       throw usageError(`Invalid server name "${name}": ${nameResult.error.issues[0].message}`)

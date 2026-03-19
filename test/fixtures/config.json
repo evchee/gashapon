@@ -1,6 +1,6 @@
 {
   "version": "1",
-  "bin_dir": "/tmp/capsule-test-bin",
+  "bin_dir": "/tmp/gashapon-test-bin",
   "servers": {
     "test": {
       "transport": "stdio",

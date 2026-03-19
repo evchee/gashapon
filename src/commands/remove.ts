@@ -5,7 +5,7 @@ import { removeWrapper } from '../util/wrapper.js'
 import { binDir } from '../config/paths.js'
 
 export default class Remove extends BaseCommand<typeof Remove> {
-  static description = 'Remove an MCP server from capsule config'
+  static description = 'Remove an MCP server from gashapon config'
 
   static args = {
     name: Args.string({ description: 'Server name', required: true }),
@@ -28,7 +28,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
     // Build undo command using base64-encoded JSON
     const configJson = JSON.stringify({ ...removed, installed: false })
     const b64 = Buffer.from(configJson).toString('base64')
-    const undoCmd = `capsule add ${args.name} --from-json-b64 ${b64}`
+    const undoCmd = `gashapon add ${args.name} --from-json-b64 ${b64}`
 
     const receipt = buildReceipt('remove', args.name, undoCmd)
     this.outputData(receipt)

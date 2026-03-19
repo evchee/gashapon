@@ -21,7 +21,7 @@ export class MCPClientWrapper {
     private readonly timeoutMs = DEFAULT_TIMEOUT_MS,
   ) {
     this.client = new Client(
-      { name: 'capsule', version: '0.1.0' },
+      { name: 'gashapon', version: '0.1.0' },
       { capabilities: {} },
     )
   }

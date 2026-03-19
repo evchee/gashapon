@@ -5,7 +5,7 @@ import path from 'node:path'
 import { ConfigManager } from '../../src/config/manager.js'
 
 async function makeManager(): Promise<{ manager: ConfigManager; cleanup: () => Promise<void> }> {
-  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'capsule-test-'))
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'gashapon-test-'))
   const manager = new ConfigManager(path.join(tmpDir, 'config.json'))
   const cleanup = async () => {
     await fs.rm(tmpDir, { recursive: true, force: true })

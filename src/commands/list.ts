@@ -32,7 +32,7 @@ export default class List extends BaseCommand<typeof List> {
     }
 
     if (data.length === 0) {
-      this.log('No servers configured. Run `capsule add` to register one.')
+      this.log('No servers configured. Run `gashapon add` to register one.')
       return
     }
 
