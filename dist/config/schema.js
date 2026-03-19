@@ -31,13 +31,19 @@ export const ServerConfigSchema = z.discriminatedUnion('transport', [
     StdioServerConfigSchema,
     HttpServerConfigSchema,
 ]);
+export const ToolConfigSchema = z.object({
+    description: z.string().optional(),
+    help_hint: z.string().optional(),
+});
 export const GashaponConfigSchema = z.object({
     version: z.literal('1'),
     bin_dir: z.string().default('~/.gashapon/bin'),
     servers: z.record(ServerNameSchema, ServerConfigSchema).default({}),
+    tools: z.record(ServerNameSchema, ToolConfigSchema).default({}),
 });
 export const DEFAULT_CONFIG = {
     version: '1',
     bin_dir: '~/.gashapon/bin',
     servers: {},
+    tools: {},
 };

@@ -38,20 +38,28 @@ export const ServerConfigSchema = z.discriminatedUnion('transport', [
   HttpServerConfigSchema,
 ])
 
+export const ToolConfigSchema = z.object({
+  description: z.string().optional(),
+  help_hint: z.string().optional(),
+})
+
 export const GashaponConfigSchema = z.object({
   version: z.literal('1'),
   bin_dir: z.string().default('~/.gashapon/bin'),
   servers: z.record(ServerNameSchema, ServerConfigSchema).default({}),
+  tools: z.record(ServerNameSchema, ToolConfigSchema).default({}),
 })
 
 export type OAuthConfig = z.infer<typeof OAuthConfigSchema>
 export type StdioServerConfig = z.infer<typeof StdioServerConfigSchema>
 export type HttpServerConfig = z.infer<typeof HttpServerConfigSchema>
 export type ServerConfig = z.infer<typeof ServerConfigSchema>
+export type ToolConfig = z.infer<typeof ToolConfigSchema>
 export type GashaponConfig = z.infer<typeof GashaponConfigSchema>
 
 export const DEFAULT_CONFIG: GashaponConfig = {
   version: '1',
   bin_dir: '~/.gashapon/bin',
   servers: {},
+  tools: {},
 }

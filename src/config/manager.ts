@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { GashaponConfigSchema, DEFAULT_CONFIG, ServerNameSchema, type GashaponConfig, type ServerConfig } from './schema.js'
+import { GashaponConfigSchema, DEFAULT_CONFIG, ServerNameSchema, type GashaponConfig, type ServerConfig, type ToolConfig } from './schema.js'
 import { configPath } from './paths.js'
 import { conflict, notFound, usageError } from '../output/errors.js'
 
@@ -90,5 +90,45 @@ export class ConfigManager {
     config.servers[name] = serverConfig
     await this.save(config)
     return config
+  }
+
+  async addTool(name: string, toolConfig: ToolConfig): Promise<GashaponConfig> {
+    const nameResult = ServerNameSchema.safeParse(name)
+    if (!nameResult.success) {
+      throw usageError(`Invalid tool name "${name}": ${nameResult.error.issues[0].message}`)
+    }
+    const config = await this.load()
+    if (config.tools[name]) {
+      throw conflict(`Tool "${name}"`, [`Use --force to overwrite`, `Run \`gashapon unregister-cli ${name}\` first`])
+    }
+    config.tools[name] = toolConfig
+    await this.save(config)
+    return config
+  }
+
+  async forceAddTool(name: string, toolConfig: ToolConfig): Promise<GashaponConfig> {
+    const nameResult = ServerNameSchema.safeParse(name)
+    if (!nameResult.success) {
+      throw usageError(`Invalid tool name "${name}": ${nameResult.error.issues[0].message}`)
+    }
+    const config = await this.load()
+    config.tools[name] = toolConfig
+    await this.save(config)
+    return config
+  }
+
+  async removeTool(name: string): Promise<GashaponConfig> {
+    const config = await this.load()
+    if (!config.tools[name]) {
+      throw notFound(`Tool "${name}"`, [`Run \`gashapon list\` to see registered tools`])
+    }
+    delete config.tools[name]
+    await this.save(config)
+    return config
+  }
+
+  async listTools(): Promise<Record<string, ToolConfig>> {
+    const config = await this.load()
+    return config.tools
   }
 }

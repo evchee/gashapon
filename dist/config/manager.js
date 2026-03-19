@@ -81,4 +81,40 @@ export class ConfigManager {
         await this.save(config);
         return config;
     }
+    async addTool(name, toolConfig) {
+        const nameResult = ServerNameSchema.safeParse(name);
+        if (!nameResult.success) {
+            throw usageError(`Invalid tool name "${name}": ${nameResult.error.issues[0].message}`);
+        }
+        const config = await this.load();
+        if (config.tools[name]) {
+            throw conflict(`Tool "${name}"`, [`Use --force to overwrite`, `Run \`gashapon unregister-cli ${name}\` first`]);
+        }
+        config.tools[name] = toolConfig;
+        await this.save(config);
+        return config;
+    }
+    async forceAddTool(name, toolConfig) {
+        const nameResult = ServerNameSchema.safeParse(name);
+        if (!nameResult.success) {
+            throw usageError(`Invalid tool name "${name}": ${nameResult.error.issues[0].message}`);
+        }
+        const config = await this.load();
+        config.tools[name] = toolConfig;
+        await this.save(config);
+        return config;
+    }
+    async removeTool(name) {
+        const config = await this.load();
+        if (!config.tools[name]) {
+            throw notFound(`Tool "${name}"`, [`Run \`gashapon list\` to see registered tools`]);
+        }
+        delete config.tools[name];
+        await this.save(config);
+        return config;
+    }
+    async listTools() {
+        const config = await this.load();
+        return config.tools;
+    }
 }

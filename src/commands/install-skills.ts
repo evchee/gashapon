@@ -7,7 +7,7 @@ import { notFound } from '../output/errors.js'
 import { buildReceipt } from '../output/receipt.js'
 
 export default class InstallSkills extends BaseCommand<typeof InstallSkills> {
-  static description = 'Install Claude Code skills for installed MCP servers into the current project'
+  static description = 'Install Claude Code skills for MCP servers and registered CLI tools into the current project'
 
   static examples = [
     '<%= config.bin %> install-skills',
@@ -16,7 +16,7 @@ export default class InstallSkills extends BaseCommand<typeof InstallSkills> {
   ]
 
   static args = {
-    name: Args.string({ description: 'Server name (defaults to all installed servers)', required: false }),
+    name: Args.string({ description: 'Server or tool name (defaults to all)', required: false }),
   }
 
   static flags = {
@@ -35,54 +35,80 @@ export default class InstallSkills extends BaseCommand<typeof InstallSkills> {
     const { args, flags } = await this.parse(InstallSkills)
 
     const servers = await this.configManager.listServers()
-    const names: string[] = []
-
-    if (args.name) {
-      if (!servers[args.name]) throw notFound(`Server "${args.name}"`, ['Run `gashapon list` to see available servers'])
-      names.push(args.name)
-    } else {
-      for (const [name, config] of Object.entries(servers)) {
-        if (config.installed) names.push(name)
-      }
-    }
-
+    const tools = await this.configManager.listTools()
     const installed: string[] = []
 
-    for (const name of names) {
-      const skillContent = buildSkillContent(name, servers[name].description)
-      const skillDir = path.join(flags.dest, wrapperName(name))
-      const skillPath = path.join(skillDir, 'SKILL.md')
+    // MCP servers
+    const serverNames = args.name
+      ? (servers[args.name] ? [args.name] : [])
+      : Object.keys(servers).filter(n => servers[n].installed)
 
-      let exists = false
-      try {
-        await fs.access(skillPath)
-        exists = true
-      } catch { /* doesn't exist */ }
+    if (args.name && !servers[args.name] && !tools[args.name]) {
+      throw notFound(`"${args.name}"`, ['Run `gashapon list` to see available servers and tools'])
+    }
 
-      if (exists && !flags.force) {
+    for (const name of serverNames) {
+      const skillPath = path.join(flags.dest, wrapperName(name), 'SKILL.md')
+      if (!flags.force && await fileExists(skillPath)) {
         process.stderr.write(`Skill for "${name}" already exists at ${skillPath} (use --force to overwrite)\n`)
         continue
       }
-
-      await fs.mkdir(skillDir, { recursive: true })
-      await fs.writeFile(skillPath, skillContent, 'utf8')
-      process.stderr.write(`Wrote skill: ${skillPath}\n`)
+      const content = buildMcpSkillContent(name, servers[name].description)
+      await writeSkill(skillPath, content)
       installed.push(wrapperName(name))
+    }
+
+    // Registered CLI tools
+    const toolNames = args.name
+      ? (tools[args.name] ? [args.name] : [])
+      : Object.keys(tools)
+
+    for (const name of toolNames) {
+      const skillPath = path.join(flags.dest, name, 'SKILL.md')
+      if (!flags.force && await fileExists(skillPath)) {
+        process.stderr.write(`Skill for "${name}" already exists at ${skillPath} (use --force to overwrite)\n`)
+        continue
+      }
+      const { description, help_hint } = tools[name]
+      const content = buildToolSkillContent(name, description, help_hint)
+      await writeSkill(skillPath, content)
+      installed.push(name)
     }
 
     this.outputData(buildReceipt('install-skills', installed.join(', ') || '(none)'))
   }
 }
 
-function buildSkillContent(serverName: string, description: string | undefined): string {
+async function fileExists(p: string): Promise<boolean> {
+  try { await fs.access(p); return true } catch { return false }
+}
+
+async function writeSkill(skillPath: string, content: string): Promise<void> {
+  await fs.mkdir(path.dirname(skillPath), { recursive: true })
+  await fs.writeFile(skillPath, content, 'utf8')
+  process.stderr.write(`Wrote skill: ${skillPath}\n`)
+}
+
+function buildMcpSkillContent(serverName: string, description: string | undefined): string {
   const binName = wrapperName(serverName)
   const desc = description ?? `${serverName} MCP server`
-
   return `---
 name: ${binName}
 description: ${desc}
 ---
 
 \`${binName}\` is available for interacting with ${serverName}. Run \`${binName} --help\` to discover available commands.
+`
+}
+
+function buildToolSkillContent(name: string, description: string | undefined, helpHint: string | undefined): string {
+  const desc = description ?? `${name} CLI tool`
+  const hint = helpHint ?? `${name} --help`
+  return `---
+name: ${name}
+description: ${desc}
+---
+
+\`${name}\` is available on this machine. Run \`${hint}\` to discover available commands.
 `
 }

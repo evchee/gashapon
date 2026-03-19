@@ -340,12 +340,12 @@
       "aliases": [],
       "args": {
         "name": {
-          "description": "Server name (defaults to all installed servers)",
+          "description": "Server or tool name (defaults to all)",
           "name": "name",
           "required": false
         }
       },
-      "description": "Install Claude Code skills for installed MCP servers into the current project",
+      "description": "Install Claude Code skills for MCP servers and registered CLI tools into the current project",
       "examples": [
         "<%= config.bin %> install-skills",
         "<%= config.bin %> install-skills slack",
@@ -508,6 +508,80 @@
         "list.js"
       ]
     },
+    "register-cli": {
+      "aliases": [],
+      "args": {
+        "name": {
+          "description": "CLI binary name",
+          "name": "name",
+          "required": true
+        }
+      },
+      "description": "Register an existing CLI tool for skill management",
+      "examples": [
+        "<%= config.bin %> register-cli confluence -d \"Confluence page management\"",
+        "<%= config.bin %> register-cli jira -d \"Jira issue tracking\" --help-hint \"jira issue --help\""
+      ],
+      "flags": {
+        "json": {
+          "description": "Format output as json.",
+          "helpGroup": "GLOBAL",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "debug": {
+          "helpGroup": "GLOBAL",
+          "name": "debug",
+          "summary": "Enable debug output (raw JSON-RPC, stack traces)",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "quiet": {
+          "char": "q",
+          "helpGroup": "GLOBAL",
+          "name": "quiet",
+          "summary": "Output bare values only",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "description": {
+          "char": "d",
+          "name": "description",
+          "summary": "What this tool is used for",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "help-hint": {
+          "name": "help-hint",
+          "summary": "Command to run for help discovery (default: <name> --help)",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "force": {
+          "name": "force",
+          "summary": "Overwrite if already registered",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "register-cli",
+      "pluginAlias": "gashapon",
+      "pluginName": "gashapon",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": true,
+      "isESM": true,
+      "relativePath": [
+        "dist",
+        "commands",
+        "register-cli.js"
+      ]
+    },
     "remove": {
       "aliases": [],
       "args": {
@@ -658,6 +732,66 @@
         "dist",
         "commands",
         "uninstall.js"
+      ]
+    },
+    "unregister-cli": {
+      "aliases": [],
+      "args": {
+        "name": {
+          "description": "CLI tool name",
+          "name": "name",
+          "required": true
+        }
+      },
+      "description": "Unregister a CLI tool and remove its skill file",
+      "examples": [
+        "<%= config.bin %> unregister-cli jira"
+      ],
+      "flags": {
+        "json": {
+          "description": "Format output as json.",
+          "helpGroup": "GLOBAL",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "debug": {
+          "helpGroup": "GLOBAL",
+          "name": "debug",
+          "summary": "Enable debug output (raw JSON-RPC, stack traces)",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "quiet": {
+          "char": "q",
+          "helpGroup": "GLOBAL",
+          "name": "quiet",
+          "summary": "Output bare values only",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "skills-dir": {
+          "name": "skills-dir",
+          "summary": "Skills directory to remove skill from",
+          "default": ".claude/skills",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "unregister-cli",
+      "pluginAlias": "gashapon",
+      "pluginName": "gashapon",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": true,
+      "isESM": true,
+      "relativePath": [
+        "dist",
+        "commands",
+        "unregister-cli.js"
       ]
     }
   },
