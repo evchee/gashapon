@@ -26,14 +26,20 @@ function readClaudeSlackMcpJson(): { clientId?: string; callbackPort?: number } 
 
 function buildSlackServerConfig(): ServerConfig {
   const { clientId, callbackPort } = readClaudeSlackMcpJson()
+  if (!clientId || !callbackPort) {
+    throw usageError(
+      'Slack MCP credentials not found — Claude Code must be installed with the Slack connector enabled',
+      ['Install the Slack connector in Claude Code, then retry'],
+    )
+  }
   return {
     transport: 'http',
     url: 'https://mcp.slack.com/mcp',
     headers: {},
     oauth: {
       grant_type: 'authorization_code',
-      ...(clientId ? { client_id: clientId } : {}),
-      ...(callbackPort ? { callback_port: callbackPort } : {}),
+      client_id: clientId,
+      callback_port: callbackPort,
     },
     installed: false,
     description: 'Slack MCP server',
