@@ -1,10 +1,14 @@
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
+import { ClientCredentialsProvider } from '@modelcontextprotocol/sdk/client/auth-extensions.js'
 import type { Transport } from '@modelcontextprotocol/sdk/shared/transport.js'
+import type { OAuthClientProvider } from '@modelcontextprotocol/sdk/client/auth.js'
 import type { ServerConfig } from '../config/schema.js'
-import { interpolateEnvMap } from '../util/env.js'
+import { interpolateEnv, interpolateEnvMap } from '../util/env.js'
+import { CliOAuthProvider, findFreePort } from '../auth/provider.js'
+import { FileTokenStore } from '../auth/token-store.js'
 
-export function createTransport(serverConfig: ServerConfig): Transport {
+export async function createTransport(serverName: string, serverConfig: ServerConfig): Promise<Transport> {
   if (serverConfig.transport === 'stdio') {
     return new StdioClientTransport({
       command: serverConfig.command,
@@ -14,15 +18,42 @@ export function createTransport(serverConfig: ServerConfig): Transport {
         ...interpolateEnvMap(serverConfig.env),
       },
     })
-  } else {
-    const headers = interpolateEnvMap(serverConfig.headers)
-    return new StreamableHTTPClientTransport(
-      new URL(serverConfig.url),
-      {
-        requestInit: {
-          headers,
-        },
-      },
-    )
   }
+
+  // HTTP transport — determine auth provider
+  const headers = interpolateEnvMap(serverConfig.headers)
+  let authProvider: OAuthClientProvider | undefined
+
+  if (serverConfig.oauth) {
+    const oauthConfig = {
+      ...serverConfig.oauth,
+      client_secret: serverConfig.oauth.client_secret
+        ? interpolateEnv(serverConfig.oauth.client_secret)
+        : undefined,
+    }
+
+    if (oauthConfig.grant_type === 'client_credentials') {
+      if (!oauthConfig.client_id || !oauthConfig.client_secret) {
+        throw new Error(`Server "${serverName}": client_credentials requires client_id and client_secret`)
+      }
+      authProvider = new ClientCredentialsProvider({
+        clientId: oauthConfig.client_id,
+        clientSecret: oauthConfig.client_secret,
+        scope: oauthConfig.scope,
+      })
+    } else {
+      // authorization_code: use file-backed provider with stored tokens
+      const store = new FileTokenStore(serverName)
+      const port = await findFreePort()
+      authProvider = new CliOAuthProvider(store, oauthConfig, port)
+    }
+  }
+
+  return new StreamableHTTPClientTransport(
+    new URL(serverConfig.url),
+    {
+      requestInit: Object.keys(headers).length > 0 ? { headers } : undefined,
+      authProvider,
+    },
+  )
 }

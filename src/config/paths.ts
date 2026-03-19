@@ -37,6 +37,11 @@ export function binDir(config: GashaponConfig): string {
   return resolve(config.bin_dir)
 }
 
+/** Path to stored OAuth tokens for a server: ~/.config/gashapon/tokens/<name>.json */
+export function tokenPath(serverName: string): string {
+  return path.join(configDir(), 'tokens', `${serverName}.json`)
+}
+
 export function completionsDir(): string {
   return path.join(resolve('~/.gashapon'), 'completions')
 }

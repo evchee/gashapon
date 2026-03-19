@@ -33,6 +33,14 @@ export default class Add extends BaseCommand<typeof Add> {
     description: Flags.string({ char: 'd', summary: 'Human-readable description' }),
     force: Flags.boolean({ summary: 'Overwrite if server already exists', default: false }),
     'from-json-b64': Flags.string({ summary: 'Base64-encoded JSON server config (used by undo commands)' }),
+    'oauth-client-id': Flags.string({ summary: 'OAuth client ID (http transport)' }),
+    'oauth-client-secret': Flags.string({ summary: 'OAuth client secret or ${ENV_VAR} reference (http transport)' }),
+    'oauth-scope': Flags.string({ summary: 'OAuth scope(s) to request (http transport)' }),
+    'oauth-grant-type': Flags.string({
+      summary: 'OAuth grant type',
+      options: ['authorization_code', 'client_credentials'],
+      default: 'authorization_code',
+    }),
   }
 
   async run(): Promise<void> {
@@ -74,10 +82,19 @@ export default class Add extends BaseCommand<typeof Add> {
     } else if (flags.url) {
       // HTTP transport
       const headers = parseKeyVal(flags.header ?? [])
+      const hasOAuth = flags['oauth-client-id'] || flags['oauth-client-secret']
       serverConfig = {
         transport: 'http',
         url: flags.url,
         headers,
+        ...(hasOAuth ? {
+          oauth: {
+            grant_type: (flags['oauth-grant-type'] as 'authorization_code' | 'client_credentials') ?? 'authorization_code',
+            client_id: flags['oauth-client-id'],
+            client_secret: flags['oauth-client-secret'],
+            scope: flags['oauth-scope'],
+          },
+        } : {}),
         installed: false,
         description: flags.description,
       }

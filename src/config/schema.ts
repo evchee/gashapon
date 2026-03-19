@@ -16,10 +16,18 @@ export const StdioServerConfigSchema = z.object({
   description: z.string().optional(),
 })
 
+export const OAuthConfigSchema = z.object({
+  grant_type: z.enum(['authorization_code', 'client_credentials']).default('authorization_code'),
+  client_id: z.string().optional(),
+  client_secret: z.string().optional(),
+  scope: z.string().optional(),
+})
+
 export const HttpServerConfigSchema = z.object({
   transport: z.literal('http'),
   url: z.string().url(),
   headers: z.record(z.string()).optional().default({}),
+  oauth: OAuthConfigSchema.optional(),
   installed: z.boolean().default(false),
   description: z.string().optional(),
 })
@@ -35,6 +43,7 @@ export const GashaponConfigSchema = z.object({
   servers: z.record(ServerNameSchema, ServerConfigSchema).default({}),
 })
 
+export type OAuthConfig = z.infer<typeof OAuthConfigSchema>
 export type StdioServerConfig = z.infer<typeof StdioServerConfigSchema>
 export type HttpServerConfig = z.infer<typeof HttpServerConfigSchema>
 export type ServerConfig = z.infer<typeof ServerConfigSchema>

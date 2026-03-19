@@ -2,7 +2,8 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import type { Tool } from '@modelcontextprotocol/sdk/types.js'
 import type { ServerConfig } from '../config/schema.js'
 import { createTransport } from './transport.js'
-import { timeoutError, upstreamError } from '../output/errors.js'
+import { StructuredError, timeoutError, upstreamError } from '../output/errors.js'
+import { EXIT } from '../output/exit-codes.js'
 
 const DEFAULT_TIMEOUT_MS = 30_000
 
@@ -27,7 +28,7 @@ export class MCPClientWrapper {
   }
 
   async connect(): Promise<void> {
-    const transport = createTransport(this.serverConfig)
+    const transport = await createTransport(this.serverName, this.serverConfig)
     try {
       await withTimeout(
         this.client.connect(transport),
@@ -37,6 +38,15 @@ export class MCPClientWrapper {
       this.connected = true
     } catch (err) {
       if (err instanceof Error && err.message.includes('timed out')) throw err
+      // UnauthorizedError: guide user to re-authenticate
+      if (err instanceof Error && err.constructor.name === 'UnauthorizedError') {
+        throw new StructuredError({
+          code: 'UNAUTHORIZED',
+          message: `Server "${this.serverName}" requires authentication. Run: gashapon auth ${this.serverName}`,
+          exitCode: EXIT.PERMISSION,
+          retryable: false,
+        })
+      }
       throw upstreamError(
         `Failed to connect to "${this.serverName}": ${(err as Error).message}`,
         true,
