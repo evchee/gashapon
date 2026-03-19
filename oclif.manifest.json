@@ -336,6 +336,74 @@
         "init.js"
       ]
     },
+    "install-skills": {
+      "aliases": [],
+      "args": {
+        "name": {
+          "description": "Server name (defaults to all installed servers)",
+          "name": "name",
+          "required": false
+        }
+      },
+      "description": "Install Claude Code skills for installed MCP servers into the current project",
+      "examples": [
+        "<%= config.bin %> install-skills",
+        "<%= config.bin %> install-skills slack",
+        "<%= config.bin %> install-skills --dest ./my-project/.claude/skills"
+      ],
+      "flags": {
+        "json": {
+          "description": "Format output as json.",
+          "helpGroup": "GLOBAL",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "debug": {
+          "helpGroup": "GLOBAL",
+          "name": "debug",
+          "summary": "Enable debug output (raw JSON-RPC, stack traces)",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "quiet": {
+          "char": "q",
+          "helpGroup": "GLOBAL",
+          "name": "quiet",
+          "summary": "Output bare values only",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "dest": {
+          "name": "dest",
+          "summary": "Destination skills directory",
+          "default": ".claude/skills",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "force": {
+          "name": "force",
+          "summary": "Overwrite existing skill files",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "install-skills",
+      "pluginAlias": "gashapon",
+      "pluginName": "gashapon",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": true,
+      "isESM": true,
+      "relativePath": [
+        "dist",
+        "commands",
+        "install-skills.js"
+      ]
+    },
     "install": {
       "aliases": [],
       "args": {
