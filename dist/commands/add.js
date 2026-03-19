@@ -22,7 +22,7 @@ function readClaudeSlackMcpJson() {
 function buildSlackServerConfig() {
     const { clientId, callbackPort } = readClaudeSlackMcpJson();
     if (!clientId || !callbackPort) {
-        throw usageError('Slack MCP credentials not found — Claude Code must be installed with the Slack connector enabled', ['Install the Slack connector in Claude Code, then retry']);
+        throw usageError('Slack MCP credentials not found — Claude Desktop must be installed with the Slack connector enabled', ['Install the Slack connector in Claude Desktop, then retry']);
     }
     return {
         transport: 'http',
