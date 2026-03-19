@@ -1,0 +1,544 @@
+{
+  "commands": {
+    "add": {
+      "aliases": [],
+      "args": {
+        "name": {
+          "description": "Server name (lowercase alphanumeric, hyphens, underscores)",
+          "name": "name",
+          "required": true
+        }
+      },
+      "description": "Register an MCP server in gashapon config",
+      "examples": [
+        "<%= config.bin %> add slack -- npx -y @slack/mcp-server",
+        "<%= config.bin %> add github --url https://mcp.github.com --header \"Authorization=Bearer ${GITHUB_TOKEN}\"",
+        "<%= config.bin %> add myserver --transport stdio --command python --args \"-m,myserver\""
+      ],
+      "flags": {
+        "json": {
+          "description": "Format output as json.",
+          "helpGroup": "GLOBAL",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "debug": {
+          "helpGroup": "GLOBAL",
+          "name": "debug",
+          "summary": "Enable debug output (raw JSON-RPC, stack traces)",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "quiet": {
+          "char": "q",
+          "helpGroup": "GLOBAL",
+          "name": "quiet",
+          "summary": "Output bare values only",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "transport": {
+          "name": "transport",
+          "summary": "Transport type",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "options": [
+            "stdio",
+            "http"
+          ],
+          "type": "option"
+        },
+        "command": {
+          "name": "command",
+          "summary": "Command to run (stdio transport)",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "args": {
+          "name": "args",
+          "summary": "Comma-separated args for the command",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "env": {
+          "name": "env",
+          "summary": "Environment variable KEY=VAL",
+          "hasDynamicHelp": false,
+          "multiple": true,
+          "type": "option"
+        },
+        "url": {
+          "name": "url",
+          "summary": "Server URL (http transport)",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "header": {
+          "name": "header",
+          "summary": "HTTP header KEY=VAL",
+          "hasDynamicHelp": false,
+          "multiple": true,
+          "type": "option"
+        },
+        "description": {
+          "char": "d",
+          "name": "description",
+          "summary": "Human-readable description",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "force": {
+          "name": "force",
+          "summary": "Overwrite if server already exists",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "from-json-b64": {
+          "name": "from-json-b64",
+          "summary": "Base64-encoded JSON server config (used by undo commands)",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "oauth": {
+          "name": "oauth",
+          "summary": "Enable OAuth for this HTTP server (run `gashapon auth <name>` after adding)",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "oauth-client-id": {
+          "name": "oauth-client-id",
+          "summary": "OAuth client ID (http transport)",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "oauth-client-secret": {
+          "name": "oauth-client-secret",
+          "summary": "OAuth client secret or ${ENV_VAR} reference (http transport)",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "oauth-scope": {
+          "name": "oauth-scope",
+          "summary": "OAuth scope(s) to request (http transport)",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "oauth-grant-type": {
+          "name": "oauth-grant-type",
+          "summary": "OAuth grant type",
+          "default": "authorization_code",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "options": [
+            "authorization_code",
+            "client_credentials"
+          ],
+          "type": "option"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "add",
+      "pluginAlias": "gashapon",
+      "pluginName": "gashapon",
+      "pluginType": "core",
+      "strict": false,
+      "enableJsonFlag": true,
+      "isESM": true,
+      "relativePath": [
+        "dist",
+        "commands",
+        "add.js"
+      ]
+    },
+    "auth": {
+      "aliases": [],
+      "args": {
+        "name": {
+          "description": "Server name",
+          "name": "name",
+          "required": true
+        }
+      },
+      "description": "Authenticate with an HTTP MCP server using OAuth",
+      "examples": [
+        "<%= config.bin %> auth github",
+        "<%= config.bin %> auth myserver --force"
+      ],
+      "flags": {
+        "json": {
+          "description": "Format output as json.",
+          "helpGroup": "GLOBAL",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "debug": {
+          "helpGroup": "GLOBAL",
+          "name": "debug",
+          "summary": "Enable debug output (raw JSON-RPC, stack traces)",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "quiet": {
+          "char": "q",
+          "helpGroup": "GLOBAL",
+          "name": "quiet",
+          "summary": "Output bare values only",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "force": {
+          "name": "force",
+          "summary": "Re-authenticate even if tokens already exist",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "auth",
+      "pluginAlias": "gashapon",
+      "pluginName": "gashapon",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": true,
+      "isESM": true,
+      "relativePath": [
+        "dist",
+        "commands",
+        "auth.js"
+      ]
+    },
+    "context": {
+      "aliases": [],
+      "args": {},
+      "description": "Show inventory of all gashapon-managed CLIs (for AI agents)",
+      "flags": {
+        "json": {
+          "description": "Format output as json.",
+          "helpGroup": "GLOBAL",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "debug": {
+          "helpGroup": "GLOBAL",
+          "name": "debug",
+          "summary": "Enable debug output (raw JSON-RPC, stack traces)",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "quiet": {
+          "char": "q",
+          "helpGroup": "GLOBAL",
+          "name": "quiet",
+          "summary": "Output bare values only",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "context",
+      "pluginAlias": "gashapon",
+      "pluginName": "gashapon",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": true,
+      "isESM": true,
+      "relativePath": [
+        "dist",
+        "commands",
+        "context.js"
+      ]
+    },
+    "exec": {
+      "aliases": [],
+      "args": {},
+      "description": "Execute a tool on an MCP server (used by wrapper scripts)",
+      "flags": {},
+      "hasDynamicHelp": false,
+      "hidden": true,
+      "hiddenAliases": [],
+      "id": "exec",
+      "pluginAlias": "gashapon",
+      "pluginName": "gashapon",
+      "pluginType": "core",
+      "strict": false,
+      "enableJsonFlag": false,
+      "isESM": true,
+      "relativePath": [
+        "dist",
+        "commands",
+        "exec.js"
+      ]
+    },
+    "install": {
+      "aliases": [],
+      "args": {
+        "name": {
+          "description": "Server name",
+          "name": "name",
+          "required": true
+        }
+      },
+      "description": "Connect to MCP server, discover tools, and install CLI wrapper",
+      "flags": {
+        "json": {
+          "description": "Format output as json.",
+          "helpGroup": "GLOBAL",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "debug": {
+          "helpGroup": "GLOBAL",
+          "name": "debug",
+          "summary": "Enable debug output (raw JSON-RPC, stack traces)",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "quiet": {
+          "char": "q",
+          "helpGroup": "GLOBAL",
+          "name": "quiet",
+          "summary": "Output bare values only",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "force": {
+          "name": "force",
+          "summary": "Re-install even if already installed",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "install",
+      "pluginAlias": "gashapon",
+      "pluginName": "gashapon",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": true,
+      "isESM": true,
+      "relativePath": [
+        "dist",
+        "commands",
+        "install.js"
+      ]
+    },
+    "list": {
+      "aliases": [],
+      "args": {},
+      "description": "List configured MCP servers",
+      "flags": {
+        "json": {
+          "description": "Format output as json.",
+          "helpGroup": "GLOBAL",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "debug": {
+          "helpGroup": "GLOBAL",
+          "name": "debug",
+          "summary": "Enable debug output (raw JSON-RPC, stack traces)",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "quiet": {
+          "char": "q",
+          "helpGroup": "GLOBAL",
+          "name": "quiet",
+          "summary": "Output bare values only",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "installed": {
+          "name": "installed",
+          "summary": "Show only installed servers",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "list",
+      "pluginAlias": "gashapon",
+      "pluginName": "gashapon",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": true,
+      "isESM": true,
+      "relativePath": [
+        "dist",
+        "commands",
+        "list.js"
+      ]
+    },
+    "remove": {
+      "aliases": [],
+      "args": {
+        "name": {
+          "description": "Server name",
+          "name": "name",
+          "required": true
+        }
+      },
+      "description": "Remove an MCP server from gashapon config",
+      "flags": {
+        "json": {
+          "description": "Format output as json.",
+          "helpGroup": "GLOBAL",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "debug": {
+          "helpGroup": "GLOBAL",
+          "name": "debug",
+          "summary": "Enable debug output (raw JSON-RPC, stack traces)",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "quiet": {
+          "char": "q",
+          "helpGroup": "GLOBAL",
+          "name": "quiet",
+          "summary": "Output bare values only",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "remove",
+      "pluginAlias": "gashapon",
+      "pluginName": "gashapon",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": true,
+      "isESM": true,
+      "relativePath": [
+        "dist",
+        "commands",
+        "remove.js"
+      ]
+    },
+    "sync": {
+      "aliases": [],
+      "args": {
+        "name": {
+          "description": "Server name (omit for --all)",
+          "name": "name"
+        }
+      },
+      "description": "Re-discover tools for installed MCP server(s) and update cache",
+      "flags": {
+        "json": {
+          "description": "Format output as json.",
+          "helpGroup": "GLOBAL",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "debug": {
+          "helpGroup": "GLOBAL",
+          "name": "debug",
+          "summary": "Enable debug output (raw JSON-RPC, stack traces)",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "quiet": {
+          "char": "q",
+          "helpGroup": "GLOBAL",
+          "name": "quiet",
+          "summary": "Output bare values only",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "all": {
+          "name": "all",
+          "summary": "Sync all installed servers",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "sync",
+      "pluginAlias": "gashapon",
+      "pluginName": "gashapon",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": true,
+      "isESM": true,
+      "relativePath": [
+        "dist",
+        "commands",
+        "sync.js"
+      ]
+    },
+    "uninstall": {
+      "aliases": [],
+      "args": {
+        "name": {
+          "description": "Server name",
+          "name": "name",
+          "required": true
+        }
+      },
+      "description": "Remove CLI wrapper and cached schema for an MCP server",
+      "flags": {
+        "json": {
+          "description": "Format output as json.",
+          "helpGroup": "GLOBAL",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "debug": {
+          "helpGroup": "GLOBAL",
+          "name": "debug",
+          "summary": "Enable debug output (raw JSON-RPC, stack traces)",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "quiet": {
+          "char": "q",
+          "helpGroup": "GLOBAL",
+          "name": "quiet",
+          "summary": "Output bare values only",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "uninstall",
+      "pluginAlias": "gashapon",
+      "pluginName": "gashapon",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": true,
+      "isESM": true,
+      "relativePath": [
+        "dist",
+        "commands",
+        "uninstall.js"
+      ]
+    }
+  },
+  "version": "0.1.0"
+}
