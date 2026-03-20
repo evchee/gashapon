@@ -50,7 +50,7 @@ describe('Agent-CLI Conformance: Capabilities manifest', () => {
       commands[cliKey] = {
         destructive: ann?.destructiveHint ?? false,
         dry_run: true,
-        idempotent: ann?.idempotentHint ?? true,
+        idempotent: ann?.idempotentHint ?? (ann?.destructiveHint === true ? false : true),
       }
     }
 

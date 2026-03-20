@@ -60,6 +60,18 @@ export class ExecutionEngine {
         }
         // Short-circuit: --help or no args
         if (argv.length === 0 || argv.includes('--help') || argv.includes('-h')) {
+            // Try to resolve a command first — if found, show per-command help
+            const helpArgv = argv.filter(a => a !== '--help' && a !== '-h');
+            if (helpArgv.length > 0) {
+                const { toolName: helpTool } = this.resolveCommand(helpArgv, mapping);
+                if (helpTool) {
+                    const helpToolObj = tools.find(t => t.name === helpTool);
+                    if (helpToolObj) {
+                        this.outputCommandHelp(serverName, helpTool, mapping, helpToolObj);
+                        return;
+                    }
+                }
+            }
             this.outputHelp(serverName, mapping);
             return;
         }
@@ -184,10 +196,24 @@ export class ExecutionEngine {
         for (const tool of tools) {
             const cliKey = mapping.reverse[tool.name] ?? tool.name;
             const ann = tool.annotations;
+            const schema = tool.inputSchema;
+            const props = schema?.properties ?? {};
+            const reqSet = new Set(schema?.required ?? []);
+            const flags = {};
+            for (const [name, prop] of Object.entries(props)) {
+                flags[name] = {
+                    type: prop.type ?? 'string',
+                    required: reqSet.has(name),
+                    ...(prop.description ? { description: prop.description } : {}),
+                    ...(prop.enum ? { enum: prop.enum } : {}),
+                };
+            }
             commands[cliKey] = {
                 destructive: ann?.destructiveHint ?? false,
                 dry_run: true,
                 idempotent: ann?.idempotentHint ?? (ann?.destructiveHint === true ? false : true),
+                ...(tool.description ? { description: tool.description } : {}),
+                flags,
             };
         }
         const manifest = {
@@ -228,7 +254,13 @@ export class ExecutionEngine {
         process.stdout.write(JSON.stringify(result, null, 2) + '\n');
     }
     outputHelp(serverName, mapping) {
-        const lines = [`Usage: ${wrapperName(serverName)} <command> [flags]`, '', 'Commands:'];
+        const bin = wrapperName(serverName);
+        const lines = [
+            `Usage: ${bin} <command> [flags]`,
+            `       ${bin} <command> '{"flag": "value"}'   (JSON blob accepted as positional arg)`,
+            '',
+            'Commands:',
+        ];
         for (const [noun, verbs] of Object.entries(mapping.tree)) {
             if (noun === '_root') {
                 for (const [verb, info] of Object.entries(verbs)) {
@@ -241,7 +273,36 @@ export class ExecutionEngine {
                 }
             }
         }
-        lines.push('', 'Global flags:', '  --capabilities   Show full command manifest', '  --json           Output as JSON', '  --dry-run        Preview without executing', '  --quiet, -q      Bare output');
-        process.stderr.write(lines.join('\n') + '\n');
+        lines.push('', 'Discovery:', `  ${bin} --capabilities         Full manifest with all commands and their flags`, `  ${bin} <command> --help       Per-command flag reference`, `  ${bin} schema <command>       Raw JSON schema for a command`, '', 'Global flags:', '  --capabilities   Show full command manifest (JSON)', '  --json           Output as JSON', '  --dry-run        Preview without executing', '  --quiet, -q      Bare output');
+        process.stdout.write(lines.join('\n') + '\n');
+    }
+    outputCommandHelp(serverName, toolName, mapping, tool) {
+        const bin = wrapperName(serverName);
+        const cliKey = mapping.reverse[toolName] ?? toolName;
+        const schema = tool.inputSchema;
+        const props = schema?.properties ?? {};
+        const reqSet = new Set(schema?.required ?? []);
+        const lines = [
+            `${tool.description ?? cliKey}`,
+            '',
+            `Usage: ${bin} ${cliKey} [flags]`,
+            `       ${bin} ${cliKey} '{"flag": "value"}'`,
+            '',
+        ];
+        if (Object.keys(props).length > 0) {
+            lines.push('Flags:');
+            for (const [name, prop] of Object.entries(props)) {
+                const req = reqSet.has(name) ? ' (required)' : '';
+                const type = prop.type ?? 'string';
+                const desc = prop.description ? `  ${prop.description}` : '';
+                const enumHint = prop.enum ? `  [${prop.enum.join('|')}]` : '';
+                lines.push(`  --${name} <${type}>${req}${desc}${enumHint}`);
+            }
+        }
+        else {
+            lines.push('  (no flags)');
+        }
+        lines.push('', 'Global flags:', '  --dry-run        Preview without executing', '  --json           Output as JSON', '  --quiet, -q      Bare output');
+        process.stdout.write(lines.join('\n') + '\n');
     }
 }
