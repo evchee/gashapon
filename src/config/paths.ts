@@ -50,3 +50,17 @@ export function completionsDir(): string {
 export function wrapperName(serverName: string): string {
   return `${serverName}_capsule`
 }
+
+export const SKILL_TARGETS = {
+  claude: '.claude/skills',
+  codex: '.agents/skills',
+} as const
+
+export type SkillTarget = keyof typeof SKILL_TARGETS
+
+/** Resolve the list of skill destination directories from --target / --dest flags. */
+export function resolveSkillDestinations(target: string, dest?: string): string[] {
+  if (dest) return [dest]
+  if (target === 'all') return Object.values(SKILL_TARGETS)
+  return [SKILL_TARGETS[target as SkillTarget]]
+}

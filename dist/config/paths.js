@@ -39,3 +39,15 @@ export function completionsDir() {
 export function wrapperName(serverName) {
     return `${serverName}_capsule`;
 }
+export const SKILL_TARGETS = {
+    claude: '.claude/skills',
+    codex: '.agents/skills',
+};
+/** Resolve the list of skill destination directories from --target / --dest flags. */
+export function resolveSkillDestinations(target, dest) {
+    if (dest)
+        return [dest];
+    if (target === 'all')
+        return Object.values(SKILL_TARGETS);
+    return [SKILL_TARGETS[target]];
+}
