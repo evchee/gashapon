@@ -103,7 +103,7 @@ name: ${binName}
 description: ${yamlQuote(desc)}
 ---
 
-\`${binName}\` is available for interacting with ${serverName}. Run \`${binName} --help\` to discover available commands.
+\`${binName}\` is available for interacting with ${serverName}. Run \`${binName} --capabilities\` to discover available commands.
 `
 }
 
