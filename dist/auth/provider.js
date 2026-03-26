@@ -12,10 +12,12 @@ export class CliOAuthProvider {
     _codeResolve;
     _codeReject;
     _codePromise;
-    constructor(store, oauthConfig, port) {
+    _serverUrl;
+    constructor(store, oauthConfig, port, serverUrl) {
         this.store = store;
         this.oauthConfig = oauthConfig;
         this._port = port;
+        this._serverUrl = serverUrl;
     }
     get redirectUrl() {
         return `http://localhost:${this._port}/callback`;
@@ -54,6 +56,13 @@ export class CliOAuthProvider {
         return this.store.saveTokens(tokens);
     }
     async redirectToAuthorization(authorizationUrl) {
+        // Ensure the callback server is running so the redirect can be received.
+        // During explicit `gashapon auth`, startServer() is called beforehand, but
+        // when the SDK triggers re-auth (e.g. expired tokens) this is the entry point.
+        if (!this._server) {
+            await this.startServer();
+            process.stderr.write(`Listening for OAuth callback on http://localhost:${this._port}/callback\n`);
+        }
         process.stderr.write(`\nAuthorization required. Opening browser...\n`);
         process.stderr.write(`If the browser doesn't open, visit:\n  ${authorizationUrl}\n\n`);
         try {
@@ -62,6 +71,22 @@ export class CliOAuthProvider {
         }
         catch {
             // Non-fatal: user can copy the URL manually
+        }
+        // When called by the SDK's transport (e.g. on 401), auth() returns 'REDIRECT'
+        // after this method completes, and the transport treats non-'AUTHORIZED' as failure.
+        // To make re-auth work, we block here until the callback code arrives, exchange it
+        // for tokens, and stop the server — so the next auth() call finds valid tokens.
+        if (this._serverUrl) {
+            process.stderr.write('Waiting for authorization code...\n');
+            try {
+                const code = await this.waitForCode();
+                const { auth } = await import('@modelcontextprotocol/sdk/client/auth.js');
+                await auth(this, { serverUrl: this._serverUrl, authorizationCode: code });
+                process.stderr.write('Authorization successful.\n');
+            }
+            finally {
+                this.stopServer();
+            }
         }
     }
     saveCodeVerifier(codeVerifier) {
